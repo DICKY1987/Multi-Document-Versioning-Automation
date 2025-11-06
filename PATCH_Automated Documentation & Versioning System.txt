@@ -1,0 +1,33 @@
+What’s partially covered (yellow)
+
+Conformance test harness as a first-class artifact. You already have unit/BDD tests, but the templates call for a conformance kit (golden fixtures, behavior/perf/chaos) emitted with each plugin. Add that explicit pack.
+
+Definition of Ready/Done. Your spec implies gate criteria; make DoR/DoD checklists explicit in each plugin template to standardize intake & release.
+
+Gaps to close (red → next steps)
+
+Executable process control (BPMN/DMN). Add /process/process.bpmn, decisions.dmn, and process-tailoring.yaml so the agent follows a fixed graph and bounded decision tables (no free-form choices).
+
+Compatibility matrix in CI. Introduce /ci/conformance-matrix.yaml and run conformance against prior contract/runtime bands; make “matrix green” part of DoD.
+
+Variability model (SPLE) for plugin options. Capture allowed feature combos (e.g., sources/parsers/runtimes) so the agent selects only valid configurations.
+
+Policy-as-code everywhere. Add OPA/Rego (or equivalent) rules and policy tests into the conformance pack; enforce at dev, CI, and runtime adapters.
+
+Telemetry/SLO pass criteria. Your tracing is in place; add SLOs (latency/error budgets) and treat breaches as perf-gate failures.
+
+Docs taxonomy & indexes. Add doc_type (template|contract|plan|guide) to front-matter and an auto-README indexer for latest versions.
+
+Concrete patch list (do now)
+
+Create: /process/process.bpmn, /process/decisions.dmn, /process/process-tailoring.yaml.
+
+Create: /conformance/fixtures/*, /conformance/tests/{contract,behavior,perf}, /ci/conformance-matrix.yaml.
+
+Update plugin scaffolds to emit conformance kits by default.
+
+Add DoR/DoD templates to each plugin’s README/healthcheck.
+
+Add policy/*.rego and wire policy tests into L5 gates.
+
+Extend doc front-matter with doc_type and enable the auto-indexer.

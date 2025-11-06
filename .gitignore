@@ -1,0 +1,28 @@
+# OS
+Thumbs.db
+*.DS_Store
+
+# Editors
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.env
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+build/
+
+# Logs / caches
+*.log
+*.tmp
+.cache/
+coverage/
+
+# Misc
+*.bak

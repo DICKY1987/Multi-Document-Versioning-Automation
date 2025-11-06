@@ -1,0 +1,26 @@
+name: ID Guard
+
+on:
+  pull_request:
+    paths:
+      - 'AUTO_VERSIONING_MOD/ids/cards/**.yaml'
+      - '**/*.md'
+
+jobs:
+  validate-id-cards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install jsonschema python-ulid pyyaml
+      - name: Validate ID cards
+        run: |
+          python -c "from AUTO_VERSIONING_MOD.core.plugins.id.validate import ValidatePlugin; from AUTO_VERSIONING_MOD.core.models.id_card import IDCard; import yaml, glob, sys; validator=ValidatePlugin();
+for path in glob.glob('AUTO_VERSIONING_MOD/ids/cards/*.yaml'):
+    data=yaml.safe_load(open(path));
+    card=IDCard.from_dict(data);
+    validator.run(card)"

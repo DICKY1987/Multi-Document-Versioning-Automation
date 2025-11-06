@@ -1,0 +1,356 @@
+This concept is called **"Design by Contract"** or **"Contract-First Design/Development"**. The specific artifact you're describing is typically called an **Interface Specification**, **Component Specification**, or **API Contract**.
+
+## Related Concepts & Terminology
+
+**Primary concepts:**
+- **Design by Contract (DbC)** — Methodology by Bertrand Meyer defining preconditions, postconditions, and invariants
+- **Contract-First Development** — Define the interface/contract before implementation
+- **Interface Definition Language (IDL)** — Formal languages to describe interfaces (OpenAPI, Protocol Buffers, GraphQL Schema, etc.)
+- **Specification by Example** — Using concrete examples to define behavior
+
+**Supporting practices:**
+- **Behavior-Driven Development (BDD)** — Given/When/Then specifications (which you're already using!)
+- **Acceptance Test-Driven Development (ATDD)** — Writing acceptance criteria before code
+- **Test-Driven Development (TDD)** — Tests define behavior
+
+## Essential Elements for Accurate File Creation
+
+To allow someone to create a file accurately from your description, include:
+
+### 1. **Purpose & Intent**
+```yaml
+purpose: "Why this exists and what problem it solves"
+context: "Where it fits in the system"
+```
+
+### 2. **Input Contract**
+```yaml
+inputs:
+  - name: source_map
+    type: object
+    schema: "path/to/schema.json"
+    required: true
+    example: |
+      {
+        "docs": [
+          {"path": "docs/guide.md", "ulid": "01ABC..."}
+        ]
+      }
+```
+
+### 3. **Output Contract**
+```yaml
+outputs:
+  - name: validation_report
+    type: object
+    schema: "path/to/schema.json"
+    guarantees:
+      - "Every input doc has a validation result"
+      - "Exit code 0 if all pass, 1 if any fail"
+    example: |
+      {
+        "passed": 42,
+        "failed": 3,
+        "errors": [...]
+      }
+```
+
+### 4. **Behavior Specification** (executable)
+```gherkin
+Given: <preconditions>
+When: <action/trigger>
+Then: <postconditions/expected results>
+```
+
+### 5. **Invariants & Rules**
+```yaml
+invariants:
+  - "Output array length equals input array length"
+  - "ULID must never change"
+  - "Keys are case-insensitive unique"
+```
+
+### 6. **Error Conditions**
+```yaml
+errors:
+  - condition: "Schema validation fails"
+    code: "ERR_SCHEMA_001"
+    action: "Exit with code 2"
+  - condition: "File not found"
+    code: "ERR_FILE_404"
+    action: "Skip and log warning"
+```
+
+### 7. **Dependencies & Context**
+```yaml
+depends_on:
+  - "docs.scan output"
+  - "doc_card.schema.json v1.x"
+calls:
+  - "kernel.registry.lookup()"
+  - "validator.validate()"
+```
+
+### 8. **Examples (concrete cases)**
+```yaml
+examples:
+  - name: "Happy path"
+    input: {...}
+    output: {...}
+  - name: "Missing required field"
+    input: {...}
+    output: {...}
+    error: "ERR_SCHEMA_001"
+```
+
+### 9. **Non-Functional Requirements**
+```yaml
+performance:
+  max_execution_time: "2s for 100 docs"
+  memory_limit: "256MB"
+constraints:
+  - "Idempotent (same input → same output)"
+  - "No side effects beyond declared outputs"
+  - "Thread-safe"
+```
+
+### 10. **Acceptance Criteria** (testable)
+```yaml
+acceptance:
+  - id: AC-001
+    test: "tests/contract/test_validate.py::test_schema_compliance"
+    must_pass: true
+```
+
+## Full Example Template
+
+Here's what a complete file specification might look like:
+
+```yaml
+# Component Specification for PLG_DOCS_VALIDATE
+
+## Identity
+component_id: PLG_DOCS_VALIDATE
+version: 0.3.0
+type: plugin
+capability: validate
+
+## Purpose
+purpose: |
+  Validates documentation files against schemas, checks links,
+  runs linting rules, and ensures DDS acceptance criteria exist.
+
+context: |
+  Runs during PR gates (docs.guard) and post-merge validation.
+  Called by kernel orchestrator after docs.scan and docs.parse.
+
+## Contract
+contract_version: ">=1.0 <2.0"
+
+### Inputs
+inputs:
+  - name: source_map
+    type: object
+    schema: schemas/docs.scan.out.schema.json
+    required: true
+    description: "Map of discovered docs with paths and metadata"
+    example:
+      docs:
+        - ulid: "01ABC123"
+          key: "DOC_GUIDE"
+          path: "docs/guide.md"
+          hash: "sha256:abc..."
+
+  - name: config
+    type: object
+    schema: schemas/validate.config.schema.json
+    required: false
+    default: {"strict_mode": false}
+    description: "Validation policy configuration"
+
+### Outputs
+outputs:
+  - name: report
+    type: object
+    schema: schemas/validate.report.schema.json
+    description: "Validation results for all docs"
+    example:
+      summary:
+        total: 10
+        passed: 8
+        failed: 2
+      results:
+        - ulid: "01ABC123"
+          status: "passed"
+          checks: [...]
+        - ulid: "01ABC456"
+          status: "failed"
+          errors: [...]
+
+### Side Effects
+side_effects:
+  - "Writes report to stdout (JSON)"
+  - "Writes detailed log to reports/validate.log"
+  - "Emits OTel span with validation_result metric"
+  - "Exit code: 0 = all pass, 1 = any fail, 2 = invalid input"
+
+## Behavior Specification
+
+### Scenario: All documents valid
+Given: 5 docs in source_map, all conformant
+When: validate() is called
+Then:
+  - report.summary.passed = 5
+  - report.summary.failed = 0
+  - exit code = 0
+  - no errors in report.results[]
+
+### Scenario: Schema violation detected
+Given: 1 doc missing required 'ulid' field
+When: validate() is called
+Then:
+  - report.summary.failed >= 1
+  - error with code "ERR_SCHEMA_001" in results
+  - exit code = 1
+
+### Scenario: Broken link found
+Given: 1 doc contains link to non-existent file
+When: validate() is called with link_check=true
+Then:
+  - error with code "ERR_LINK_404" in results
+  - exit code = 1
+
+## Rules & Invariants
+
+invariants:
+  - "len(report.results) == len(inputs.source_map.docs)"
+  - "Every doc gets exactly one result entry"
+  - "report.summary counts match result array"
+
+rules:
+  - "Schema validation runs first (fail fast)"
+  - "Link checking only for active docs (status != deprecated)"
+  - "Linting warnings don't fail build unless strict_mode=true"
+
+## Error Handling
+
+errors:
+  - code: ERR_SCHEMA_001
+    condition: "Input violates schema"
+    severity: error
+    action: "Exit 2, log violation"
+    
+  - code: ERR_LINK_404
+    condition: "Dead link found"
+    severity: error
+    action: "Add to report, exit 1"
+    
+  - code: WARN_LINT_001
+    condition: "Linting rule violated"
+    severity: warning
+    action: "Add to report, exit 0 (unless strict_mode)"
+
+## Dependencies
+
+requires:
+  kernel_api:
+    - registry.lookup()
+    - logger.emit()
+  
+  external_libs:
+    - jsonschema >= 4.0
+    - markdown-link-check >= 3.10
+    - markdownlint-cli2 >= 0.12
+
+  data_dependencies:
+    - docs.scan.out.schema.json
+    - doc_card.schema.json
+
+## Examples
+
+examples:
+  - name: happy_path
+    input_file: examples/validate.in.json
+    output_file: examples/validate.out.json
+    exit_code: 0
+
+  - name: schema_failure
+    input_file: examples/validate.invalid.in.json
+    error_expected: ERR_SCHEMA_001
+    exit_code: 2
+
+## Non-Functional Requirements
+
+performance:
+  max_time: "< 5s for 100 docs"
+  memory: "< 512MB"
+  
+quality:
+  test_coverage: "> 90%"
+  mutation_score: "> 80%"
+
+constraints:
+  - idempotent: true
+  - side_effect_free: false (logs/reports written)
+  - thread_safe: true
+  - reentrant: true
+
+## Acceptance Criteria
+
+acceptance:
+  - id: AC-VALIDATE-001
+    description: "Schema validation works"
+    test: tests/contract/test_validate.py::test_schema_validation
+    
+  - id: AC-VALIDATE-002
+    description: "Link checking works"
+    test: tests/behavior/validate.feature::broken_links
+    
+  - id: AC-VALIDATE-003
+    description: "Report format matches schema"
+    test: tests/contract/test_validate.py::test_output_schema
+
+## Implementation Guidance
+
+architecture:
+  pattern: "Ports & Adapters (Hexagonal)"
+  layers:
+    - "Acquisition: read inputs, validate input schema"
+    - "Domain: validation logic (pure functions)"
+    - "Reporting: format output, emit telemetry"
+
+testability:
+  - "All validators injectable"
+  - "All I/O at boundaries"
+  - "Core logic has no side effects"
+
+## Deliverables
+
+must_produce:
+  - src/validate.py (main implementation)
+  - tests/test_validate.py (L0-L2 tests)
+  - schemas/validate.report.schema.json
+  - examples/*.json (3+ examples)
+  - README.md (usage guide)
+  - manifest.yaml (plugin descriptor)
+```
+
+## Standards/Formats for This
+
+Different domains use different formats:
+
+- **OpenAPI/Swagger** — REST APIs
+- **GraphQL Schema** — GraphQL APIs
+- **Protocol Buffers (.proto)** — gRPC services
+- **AsyncAPI** — Event-driven architectures
+- **JSON Schema** — Data structures
+- **Gherkin** — Behavior specifications
+- **ADR (Architecture Decision Record)** — Design decisions
+
+Your current spec already uses many of these! You're doing **contract-first** with:
+- JSON Schema for data
+- Gherkin for behavior
+- YAML manifests for metadata
+
+To make files "spec-complete" (implementable from spec alone), you just need to systematically apply this structure to **each plugin/component**.
+

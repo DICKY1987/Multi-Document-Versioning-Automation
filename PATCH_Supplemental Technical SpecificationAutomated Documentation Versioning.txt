@@ -1,0 +1,297 @@
+# Supplemental Technical Specification — Automated Documentation & Versioning (Patch Pack)
+
+> This document contains **only the missing/partial elements** identified in the last three reviews. It is structured to slot cleanly into the original spec (same section taxonomy). Each block is self-contained and can be merged verbatim.
+
+---
+
+## 2) Data Contracts — Addenda
+
+### 2.1 ID Card schema: new/clarified fields
+
+* **`doc_type` (enum)**: `"template" | "contract" | "plan" | "guide" | "standard" | "reference" | "policy"`.
+  Purpose: taxonomy & indexing.
+* **`deprecated_date` (string, date)** and **`deprecation_reason` (string)**: optional, required when `status="deprecated"`.
+* **`mfid` (object)**: content fingerprint.
+
+  * `algo` (enum): `"blake3"` (default), `"sha256"`
+  * `digest` (string, hex/base64)
+  * `normalized` (boolean, default `true`) – indicates canonicalization (LF line endings, trimmed trailing spaces) before hashing.
+
+**Schema fragment (JSON Schema, additive):**
+
+```json
+{
+  "properties": {
+    "doc_type": { "type": "string", "enum": ["template","contract","plan","guide","standard","reference","policy"] },
+    "deprecated_date": { "type": "string", "format": "date" },
+    "deprecation_reason": { "type": "string", "minLength": 1 },
+    "mfid": {
+      "type": "object",
+      "properties": {
+        "algo": { "type": "string", "enum": ["blake3", "sha256"], "default": "blake3" },
+        "digest": { "type": "string", "minLength": 10 },
+        "normalized": { "type": "boolean", "default": true }
+      },
+      "required": ["algo","digest"]
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "deprecated" } } },
+      "then": { "required": ["deprecated_date","deprecation_reason"] }
+    }
+  ]
+}
+```
+
+### 2.2 Ledger Event schema: new event types & payload shapes
+
+Add event types and **minimum payload contracts**:
+
+* `CREATE`: `{ "initial_semver": "x.y.z" }`
+* `REKEY`: `{ "old_key": "string", "new_key": "string" }`
+* `DEPRECATE`: `{ "reason": "string", "deprecated_date": "YYYY-MM-DD" }`
+* `CONSOLIDATE`: `{ "target_ulid": "ULID", "sources": ["ULID", ...] }`
+* `MFID_UPDATE`: `{ "algo": "blake3|sha256", "digest": "string", "normalized": true }`
+
+**Schema fragment (additive):**
+
+```json
+{
+  "properties": {
+    "event_type": {
+      "type": "string",
+      "enum": ["CREATE","REKEY","DEPRECATE","CONSOLIDATE","MFID_UPDATE"]
+    },
+    "data": { "type": "object" }
+  },
+  "required": ["event_type","timestamp","ulid","doc_key","data"]
+}
+```
+
+### 2.3 Registry canonical shape & drift policy
+
+* **Canonical file**: `registry/registry.yaml` as a **flat map (by key)**.
+  Example:
+
+  ```yaml
+  DOC_OPERATING_CONTRACT:
+    ulid: 01JC…ABC
+    semver: 1.3.0
+    status: active
+    path: docs/source/VERSIONING_OPERATING_CONTRACT.md
+    aliases: ["DOC_OC","OC_CORE"]
+  ```
+* **Aux view (optional, generated)**: `registry/registry.by_ulid.yaml`:
+
+  ```yaml
+  01JC…ABC: { key: DOC_OPERATING_CONTRACT, semver: 1.3.0, status: active, path: ... }
+  ```
+* **Drift rule (CI)**: registry must be **generated**; PRs that manually edit the canonical file fail unless accompanied by a generator delta and green conformance.
+
+---
+
+## 3) Lifecycle & Identity — Extensions
+
+* **Consolidation/Merge**: Target **retains** ULID; sources become immutable, set `merged_into: <target_ulid>`. Target card **may** add `absorbs: [<source_ulid>…]`. Emit `CONSOLIDATE` event with `sources[]`.
+* **MFID update**: Any content change that updates `mfid` emits `MFID_UPDATE`. If MFID changes **without** SemVer bump, CI fails (SemVer must reflect meaningful content deltas).
+
+---
+
+## 4) CLI Surface — Additions
+
+**Command map (all support `--dry-run` and `--out <path>`):**
+
+* `id mint --key <doc_key> --owner <team> [--doc-type <type>]`
+* `id rekey --ulid <ulid> --new-key <key>`
+* `id deprecate --ulid <ulid> --reason "<text>" --date YYYY-MM-DD`
+* `id consolidate --target <ulid> --sources <ulid,ulid,…>`
+* `id mfid.update --ulid <ulid> --algo blake3|sha256 [--normalize on|off]`
+* `id registry.build [--roots docs/,plans/]`
+* `id ledger.append --type <EVENT> --ulid <ulid> --data <json>`
+* `id validate card --path <card.yaml>`
+* `docs migrate --roots docs/,plans/ --owner <team> --key-strategy <slug|map:file> [--commit]`
+
+**I/O contract**: All commands write a JSON result to stdout with `{ ok: bool, artifacts: [], messages: [], errors: [] }`.
+
+---
+
+## 5) New Plugins
+
+### 5.1 `docs.migrate`
+
+* **Purpose**: Bootstrap legacy Markdown into governed Cards/Registry.
+* **Inputs**: roots, default owner/team, key strategy (`slug` or `map`), policy for collisions (`skip|overwrite|fail`).
+* **Behavior**:
+
+  1. Discover docs lacking ULID.
+  2. Mint ULIDs + Cards, write `CREATE` events.
+  3. Generate/refresh registry; print migration report.
+* **Acceptance**: 100% of discovered docs yield valid Cards; registry has no orphans; ledger has a `CREATE` per new card.
+
+### 5.2 `id.mfid.update`
+
+* **Purpose**: Compute canonical MFID and store in Card; append `MFID_UPDATE`.
+* **Normalization**: convert line endings to LF; trim trailing whitespace; preserve UTF-8.
+
+---
+
+## 6) Process Artifacts (BPMN/DMN)
+
+* **BPMN** (`/process/process.bpmn`):
+  Nodes: *Author Edit* → *PR Opened* → *docs.guard* → (Fail → *Fix & Re-run*) | (Pass → *Merge*) → *registry.build* → *publish* → *PUBLISH event*.
+* **DMN** (`/process/decisions.dmn`):
+  Decision tables for SemVer bumps, one-artifact rule, and policy escalations.
+* **Tailoring** (`/process/process-tailoring.yaml`):
+  Feature flags (e.g., `enforce_one_artifact: true`), path roots, allowed doc types.
+
+---
+
+## 7) Conformance & Compatibility
+
+### 7.1 Conformance Kit (per plugin)
+
+* `/conformance/fixtures/**`: golden Cards/Registries/Ledger slices.
+* `/conformance/tests/contract/*`: schema checks & error semantics.
+* `/conformance/tests/behavior/*`: BDD Given/When/Then.
+* `/conformance/tests/perf/*`: build-time budget smoke tests.
+* **Artifact**: `conformance/results.json` attached in CI.
+
+### 7.2 CI Compatibility Matrix
+
+`/ci/conformance-matrix.yaml`:
+
+```yaml
+runtime: { python: ["3.11","3.12"], os: ["ubuntu-latest","windows-latest"] }
+contracts: { plugin: [">=1.0 <2.0"], card: [">=1.0 <2.0"] }
+plugins: ["id.mint","id.rekey","id.deprecate","id.consolidate","id.mfid.update","id.registry.build","docs.migrate","id.validate","id.ledger.append"]
+```
+
+**Exit criteria**: All matrix entries green; failures block release.
+
+---
+
+## 8) Policy-as-Code
+
+* **Rules** (`/policy/`): OPA/Rego (or equivalent) for: one-artifact rule, SemVer mapping, doc_type allowlist, MFID required on release, forbid MINOR for specific contract types (if configured).
+* **Tests** (`/policy/tests/*`): Each rule has at least one positive & one negative case.
+* **CI wiring**: L5 gate runs policy bundle; violations fail PR.
+
+---
+
+## 9) Observability & SLOs
+
+* **Spans**: every plugin emits OTel spans with attrs: `plugin.key`, `subject.ulid`, `doc_key`, `event_type`, `result`.
+* **SLOs** (default):
+
+  * Registry build p95 < 2s, error rate < 0.5%
+  * Validation p95 < 1s/file
+  * Publish end-to-end < 5m
+* **Enforcement**: Breaches fail perf gate and create `PUBLISH_BLOCKED` annotation in run ledger.
+
+---
+
+## 10) Taxonomy & Auto-Index
+
+* **`doc_type`** required for new Cards.
+* **Auto-indexer**: generates `docs/INDEX.md` listing latest version per `doc_type`, linking to canonical tags.
+* **Link integrity**: index generation fails if a referenced tag is missing.
+
+---
+
+## 11) Registry & Drift — Operational Rules
+
+* Only **generator** writes the canonical registry file.
+* Manual edits are rejected unless: (a) accompanied by updated generator code/tests, and (b) conformance & matrix pass.
+* **Alias collisions** are illegal: CI fails when two keys share any alias.
+
+---
+
+## 12) Retention, Rotation, Immutability
+
+* **Ledger** rotates at 50 MB or 100k events into `.ledger/archive/ids.YYYYMMDD.jsonl` (read-only).
+* **.runs snapshots** retained for 180 days (configurable).
+* **WORM** suggestion: enable repository protections/tags to keep immutable history of releases.
+
+---
+
+## 13) Tests — Coverage Additions
+
+* Lifecycle tests must **also** assert the corresponding **ledger events** conform to `ledger_event.schema.json`.
+* Registry tests must validate the file against `registry/registry.schema.json`.
+* Dual validation paths:
+
+  * **Front-matter (extended)**: permissive.
+  * **Card (strict)**: `additionalProperties=false`, with new fields above.
+
+---
+
+## 14) File Tree — New/Updated Paths
+
+```
+/policy/
+  rules.rego
+  tests/
+    one_artifact_negative.rego
+    semver_mapping_positive.rego
+/process/
+  process.bpmn
+  decisions.dmn
+  process-tailoring.yaml
+/conformance/
+  fixtures/... (cards, registries, ledgers)
+  tests/
+    contract/...
+    behavior/...
+    perf/...
+/ci/
+  conformance-matrix.yaml
+/plugins/
+  docs.migrate/
+    manifest.yaml
+    src/migrate.py
+    tests/...
+  id.mfid.update/
+    manifest.yaml
+    src/mfid_update.py
+    tests/...
+/registry/
+  registry.yaml                 # canonical (by key)
+  registry.by_ulid.yaml         # generated view
+```
+
+---
+
+## 15) Acceptance (DoR/DoD) — Additions
+
+**Definition of Ready (per plugin)**
+
+* Contract schemas defined; fixture set complete (happy + ≥3 edge cases).
+* Telemetry & policy hooks stubbed; dry-run semantics specified.
+
+**Definition of Done**
+
+* L0–L3 green **and** policy tests green.
+* Registry regenerated; drift check passes.
+* Corresponding ledger events appended & validated.
+* SLOs within budget in CI run.
+
+---
+
+## 16) Patch Notes (spec merge checklist)
+
+* [ ] Add new Card fields: `doc_type`, `deprecated_date`, `deprecation_reason`, `mfid{algo,digest,normalized}`.
+* [ ] Extend Ledger events with `CONSOLIDATE`, `MFID_UPDATE` + payload shapes.
+* [ ] Fix registry canonicalization (flat map) and drift policy.
+* [ ] Document CLI additions & standard JSON result envelope.
+* [ ] Introduce `docs.migrate` and `id.mfid.update` plugins.
+* [ ] Add BPMN/DMN and tailoring file set.
+* [ ] Add conformance kit & CI compatibility matrix.
+* [ ] Wire policy-as-code; define SLOs & perf gate.
+* [ ] Require doc taxonomy & auto-indexer.
+
+---
+
+### End of Supplemental Patch Pack
+
+This supplement is designed to paste into the original spec under the corresponding headings. If you’d like, I can generate the **schema diffs**, **plugin manifests**, and **CI matrix stubs** as committed files next.

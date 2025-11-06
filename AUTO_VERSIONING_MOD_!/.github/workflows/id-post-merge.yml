@@ -1,0 +1,29 @@
+name: ID Post Merge
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build-registry:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install pyyaml
+      - name: Build registry
+        run: |
+          python - <<'PY'
+          from AUTO_VERSIONING_MOD.core.plugins.id.registry import RegistryBuildPlugin
+          plugin = RegistryBuildPlugin()
+          plugin.run()
+          PY
+      - name: Commit registry
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'ci: update ID registry'
+          file_pattern: 'AUTO_VERSIONING_MOD/ids/registry.yaml'

@@ -1,0 +1,299 @@
+name: Documentation Guard
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**/*.md'
+      - 'plans/**/*.md'
+
+jobs:
+  validate-docs:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history for comparison
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Get changed files
+        id: changed-files
+        run: |
+          # Get list of changed documentation files
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} -- 'docs/**/*.md' 'plans/**/*.md')
+          echo "changed_files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          # Count changed files
+          CHANGED_COUNT=$(echo "$CHANGED_FILES" | grep -c '.' || echo "0")
+          echo "changed_count=$CHANGED_COUNT" >> $GITHUB_OUTPUT
+          
+          echo "Changed documentation files: $CHANGED_COUNT"
+          echo "$CHANGED_FILES"
+      
+      - name: Enforce one-document rule
+        if: steps.changed-files.outputs.changed_count != '0'
+        run: |
+          CHANGED_COUNT=${{ steps.changed-files.outputs.changed_count }}
+          
+          if [ "$CHANGED_COUNT" -gt 1 ]; then
+            echo "❌ ERROR: Only one documentation file may be changed per PR"
+            echo ""
+            echo "This PR modifies $CHANGED_COUNT files:"
+            echo "${{ steps.changed-files.outputs.changed_files }}"
+            echo ""
+            echo "Please split this PR into separate PRs, one per document."
+            echo "This ensures:"
+            echo "  • Clear version history per document"
+            echo "  • Atomic changes and rollback capability"
+            echo "  • Proper SemVer bumping per document"
+            exit 1
+          fi
+          
+          echo "✓ One-document rule: PASS"
+      
+      - name: Validate front-matter and SemVer
+        if: steps.changed-files.outputs.changed_count != '0'
+        run: |
+          python3 - << 'PYTHON_SCRIPT'
+          import sys
+          import re
+          from pathlib import Path
+          
+          def extract_frontmatter(content):
+              """Extract YAML front-matter from markdown"""
+              if not content.startswith('---'):
+                  return None
+              parts = content.split('---', 2)
+              if len(parts) < 3:
+                  return None
+              
+              metadata = {}
+              for line in parts[1].strip().split('\n'):
+                  if ':' in line:
+                      key, value = line.split(':', 1)
+                      key = key.strip()
+                      value = value.strip().strip('"').strip("'")
+                      if value.lower() in ('null', '~', ''):
+                          value = None
+                      metadata[key] = value
+              return metadata
+          
+          def validate_document(file_path, is_new=False):
+              """Validate document front-matter"""
+              try:
+                  content = Path(file_path).read_text(encoding='utf-8')
+              except Exception as e:
+                  print(f"❌ {file_path}: Cannot read file - {e}")
+                  return False
+              
+              metadata = extract_frontmatter(content)
+              if not metadata:
+                  print(f"❌ {file_path}: Missing front-matter")
+                  return False
+              
+              # Required fields
+              required = ['doc_key', 'semver', 'status', 'effective_date', 'owner', 'contract_type']
+              missing = [f for f in required if f not in metadata or not metadata[f]]
+              if missing:
+                  print(f"❌ {file_path}: Missing required fields: {', '.join(missing)}")
+                  return False
+              
+              # Validate semver
+              if not re.match(r'^\d+\.\d+\.\d+$', metadata['semver']):
+                  print(f"❌ {file_path}: Invalid semver '{metadata['semver']}' (must be MAJOR.MINOR.PATCH)")
+                  return False
+              
+              # Validate status
+              if metadata['status'] not in ['active', 'deprecated', 'frozen']:
+                  print(f"❌ {file_path}: Invalid status '{metadata['status']}'")
+                  return False
+              
+              # Validate contract_type
+              if metadata['contract_type'] not in ['policy', 'intent', 'execution_contract']:
+                  print(f"❌ {file_path}: Invalid contract_type '{metadata['contract_type']}'")
+                  return False
+              
+              print(f"✓ {file_path}: Valid front-matter")
+              return True
+          
+          # Get changed file
+          changed_files = """${{ steps.changed-files.outputs.changed_files }}""".strip().split('\n')
+          changed_files = [f for f in changed_files if f]
+          
+          if not changed_files:
+              print("No files to validate")
+              sys.exit(0)
+          
+          # Validate each file
+          all_valid = True
+          for file_path in changed_files:
+              if not Path(file_path).exists():
+                  print(f"⚠ {file_path}: File deleted (skipping validation)")
+                  continue
+              
+              if not validate_document(file_path):
+                  all_valid = False
+          
+          if not all_valid:
+              sys.exit(1)
+          PYTHON_SCRIPT
+      
+      - name: Check SemVer bump requirements
+        if: steps.changed-files.outputs.changed_count != '0'
+        run: |
+          python3 - << 'PYTHON_SCRIPT'
+          import sys
+          import re
+          import subprocess
+          from pathlib import Path
+          
+          def get_semver(file_path):
+              """Extract semver from file"""
+              try:
+                  content = Path(file_path).read_text(encoding='utf-8')
+                  if not content.startswith('---'):
+                      return None
+                  parts = content.split('---', 2)
+                  if len(parts) < 3:
+                      return None
+                  
+                  for line in parts[1].strip().split('\n'):
+                      if line.strip().startswith('semver:'):
+                          version = line.split(':', 1)[1].strip().strip('"').strip("'")
+                          return version
+              except:
+                  return None
+              return None
+          
+          def compare_versions(old, new):
+              """Compare two semver versions and return bump type"""
+              old_parts = [int(x) for x in old.split('.')]
+              new_parts = [int(x) for x in new.split('.')]
+              
+              if new_parts[0] > old_parts[0]:
+                  return 'major'
+              elif new_parts[1] > old_parts[1]:
+                  return 'minor'
+              elif new_parts[2] > old_parts[2]:
+                  return 'patch'
+              else:
+                  return 'none'
+          
+          # Get PR title
+          pr_title = """${{ github.event.pull_request.title }}"""
+          
+          # Determine intent from PR title (Conventional Commits)
+          intent = 'unknown'
+          if pr_title.startswith('feat!:') or 'BREAKING' in pr_title:
+              intent = 'major'
+          elif pr_title.startswith('feat:'):
+              intent = 'minor'
+          elif pr_title.startswith('fix:') or pr_title.startswith('docs:'):
+              intent = 'patch'
+          
+          # Get changed file
+          changed_files = """${{ steps.changed-files.outputs.changed_files }}""".strip().split('\n')
+          changed_files = [f for f in changed_files if f and Path(f).exists()]
+          
+          if not changed_files:
+              print("No files to check")
+              sys.exit(0)
+          
+          file_path = changed_files[0]
+          
+          # Get old version (from base branch)
+          try:
+              old_content = subprocess.run(
+                  ['git', 'show', f'${{ github.event.pull_request.base.sha }}:{file_path}'],
+                  capture_output=True,
+                  text=True,
+                  check=True
+              ).stdout
+              
+              # Extract old semver
+              old_version = None
+              if old_content.startswith('---'):
+                  parts = old_content.split('---', 2)
+                  if len(parts) >= 3:
+                      for line in parts[1].strip().split('\n'):
+                          if line.strip().startswith('semver:'):
+                              old_version = line.split(':', 1)[1].strip().strip('"').strip("'")
+                              break
+          except subprocess.CalledProcessError:
+              # New file
+              old_version = None
+          
+          # Get new version
+          new_version = get_semver(file_path)
+          
+          if not new_version:
+              print(f"❌ Cannot extract semver from {file_path}")
+              sys.exit(1)
+          
+          if not old_version:
+              print(f"✓ New document: {file_path} (version {new_version})")
+              sys.exit(0)
+          
+          # Compare versions
+          bump_type = compare_versions(old_version, new_version)
+          
+          print(f"Old version: {old_version}")
+          print(f"New version: {new_version}")
+          print(f"Bump type: {bump_type}")
+          print(f"PR intent: {intent}")
+          
+          # Validate bump
+          if bump_type == 'none':
+              print(f"❌ ERROR: semver must increase (old: {old_version}, new: {new_version})")
+              sys.exit(1)
+          
+          if intent != 'unknown':
+              if intent == 'major' and bump_type != 'major':
+                  print(f"❌ ERROR: PR title suggests BREAKING change but bump is {bump_type}. Require MAJOR.")
+                  sys.exit(1)
+              elif intent == 'minor' and bump_type not in ['minor', 'major']:
+                  print(f"❌ ERROR: PR title suggests new feature but bump is {bump_type}. Require MINOR or MAJOR.")
+                  sys.exit(1)
+          
+          print("✓ SemVer bump is valid")
+          PYTHON_SCRIPT
+      
+      - name: Build doc registry & enforce uniqueness
+        run: |
+          # Create .runs directory
+          mkdir -p .runs
+          
+          # Run registry builder
+          python3 scripts/build_doc_registry.py --output .runs/doc-registry.json
+          
+          if [ $? -ne 0 ]; then
+            echo "❌ Document registry validation failed"
+            exit 1
+          fi
+          
+          echo "✓ All doc_key identifiers are unique"
+      
+      - name: Upload registry artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: doc-registry
+          path: .runs/doc-registry.json
+          retention-days: 30
+      
+      - name: Summary
+        if: success()
+        run: |
+          echo "✅ Documentation validation complete"
+          echo ""
+          echo "Checks passed:"
+          echo "  ✓ One-document rule"
+          echo "  ✓ Front-matter validation"
+          echo "  ✓ SemVer bump requirements"
+          echo "  ✓ Unique doc_key identifiers"

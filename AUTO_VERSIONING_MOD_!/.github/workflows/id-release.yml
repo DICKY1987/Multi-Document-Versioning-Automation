@@ -1,0 +1,37 @@
+name: ID Release
+
+on:
+  push:
+    tags:
+      - 'docs-*'
+      - 'idcard-*'
+
+jobs:
+  build-and-export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install pyyaml
+      - name: Export registry
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from AUTO_VERSIONING_MOD.core.plugins.id.registry import RegistryBuildPlugin
+          from AUTO_VERSIONING_MOD.core.plugins.id.export.csv import CSVExportPlugin
+          from AUTO_VERSIONING_MOD.core.plugins.id.export.markdown import MarkdownExportPlugin
+          from AUTO_VERSIONING_MOD.core.plugins.id.export.json import JSONExportPlugin
+          reg = RegistryBuildPlugin().run()
+          CSVExportPlugin().run(reg, Path('AUTO_VERSIONING_MOD/.exports/registry.csv'))
+          MarkdownExportPlugin().run(reg, Path('AUTO_VERSIONING_MOD/.exports/registry.md'))
+          JSONExportPlugin().run(reg, Path('AUTO_VERSIONING_MOD/.exports/registry.json'))
+          PY
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: id-module-exports
+          path: AUTO_VERSIONING_MOD/.exports

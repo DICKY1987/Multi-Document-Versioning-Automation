@@ -1,0 +1,562 @@
+suite:
+  suite_id: V9A44KD1804J2KR9D0WBZSWVA3
+  title: "Automated Documentation & Versioning \u2013 Technical Specification"
+  version: 1.0.0
+  effective_date: 2025-11-06
+  volumes:
+  - id: 6QJV4GKKEE8THE57YE3Z3HRR56
+    key: ARCH
+    title: Architecture & Scope
+    sections:
+    - id: TJ60QE4R87TKDB1E5TJBQQZV6V
+      key: '1'
+      title: Overview
+      file: docs/source/01-architecture/00-overview.md
+      mfid: ebb36c2a14930869ded00016c96a4df819329a12414886449e3fbe90f1044c4d
+      paragraphs:
+      - id: 17AHXXWAHWNCJ7TN0VE1108YRN
+        anchor: p-1
+        mfid: a8f91abb4c41aa11ada29f223bffe297806e0aba1e9a03c089a34d1952d9da4d
+      - id: MNMSBJ3JWVV2ZJX3NGJWS4MSJ9
+        anchor: p-2
+        mfid: 51c308daf36b20e8b96059f2b7f97fddf7c510cc819f6206848a06a15b74178e
+      - id: JWPAHGNCPQDV5WJRRZSP8ZP1FF
+        anchor: p-3
+        mfid: 4d24d9ef9d016bfb7d8fba755f31895a1e6bfaf22e555c6b21f3eced9e5646a6
+      - id: MFJBY6K2TLTN46B734UHOWFQSA
+        anchor: p-4
+        mfid: 37f633c848b8772b83127e35a4a49397c5743ff35ef01333a5127903823457e2
+      - id: Y3ZVSQENW2YJ7RJXVQEHMUGWTM
+        anchor: p-5
+        mfid: 08c755f7fc01da8d4f06cfc4be9cc807ed73a81604fa3be8fc7db32125575e4d
+      - id: VA6NVUCHKUS3ZE43CXTKPTLUO4
+        anchor: p-6
+        mfid: 58f4d704c61c6a6c273d37fda0b89988fafa7c7d73fd888ce64195f727d84ab8
+      - id: UUSSOBFMTFEG4AHY2LR547TZGE
+        anchor: p-7
+        mfid: d4908ece1010f312af67238d065d10e9d7f15bd03f54902721f997d2cad04117
+    - id: XZ2718QNG3TZFJ4CW2CF490Q52
+      key: '1.1'
+      title: "Micro\u2011kernel & Plugins"
+      file: docs/source/01-architecture/01-microkernel-plugins.md
+      mfid: 5699133c2a36479655ca3c19819508d0e4da9f8f0a6019924ae1d4727a6f7d6d
+      paragraphs:
+      - id: ALW7P2T4R7VCTNQMZQQ4SG3SHA
+        anchor: p-1
+        mfid: ca9459c747bd343db154997b4063ac1d4668747af914ff9b0371effbe6f768c8
+      - id: G52E24VF7SHESXIOVGFGNBMH7E
+        anchor: p-2
+        mfid: 7f157ea89938dff0a6458c06e5ccafacb319d36ddbca980885ae3edf0c2a3c1e
+      - id: BKLDGEI4JFI5YJIW3P23PFAWNY
+        anchor: p-3
+        mfid: ff5b1acd837fecfe946acbc9c9d7d3fdddf2914607c6e72abbd99c2abe3d5a62
+      - id: CUVTPN34EZ6DMVDPYCNB7574LA
+        anchor: p-4
+        mfid: 944aca071cf14d37e8130d484732dbba784d5356073953dee98b102f0d5426bc
+      - id: 5ON3OYHK4IICQ6GCLOYUHOWT7I
+        anchor: p-5
+        mfid: 90ee9870cceb8f83b3e78642b462bb9b985c22e09b1d414000be2819c219c01b
+      - id: EUYGTQ6RTJVWAXKBXQINJJJKYQ
+        anchor: p-6
+        mfid: 950d0e01a5c20238f923819703cfebfff00c1a2108a493c84c365f0027232a16
+      - id: V2HNHLRMKMXYCEDLG73KRNERBQ
+        anchor: p-7
+        mfid: f3ce7bd2c946cf85734bf127757579080557c34a41fe2e24ceb1d61d7113e492
+      - id: DPMBN6JMD4YPQUPJEISXQ7FVH4
+        anchor: p-8
+        mfid: 56e94904e188c912c54a6872e528e163915c4606defe01c747e7b6b1f47ca402
+  - id: 2Q87W1H8NSVW9GNP3988HREP8Y
+    key: OPER
+    title: Operating Contract
+    sections:
+    - id: ZD7CYCDVCE3GMCM0XKXMS88DXD
+      key: '1'
+      title: Versioning & Identity
+      file: docs/source/02-operating-contract/00-versioning-identity.md
+      mfid: 965401aa36ae7782da94a0b6a9bdb65dd45682e89ebc980ead74457dca431027
+      paragraphs:
+      - id: N993P6000FZC0H3DKZWZDSMK1W
+        anchor: p-1
+        mfid: 215708e1986c01d2d6b9eb7193c9f6cf9a44b0f013ac35ae94b5bbe33e35ff46
+      - id: AQD31K5W7V1YX2R33NAGSNRQJ6
+        anchor: p-2
+        mfid: 423981f2fb900a2865eaaec8de179f3f5bdccad8bd4325ca5ae3fe575682e904
+    - id: ZBJP7X22QHGFFYD2PLL6HN5NRM
+      key: '2'
+      title: Lifecycle & Extensions
+      file: docs/source/02-operating-contract/01-lifecycle-extensions.md
+      mfid: d34d397516ef946e8103d2c02bbeb15f81d73958cb6df8d3a5f1422b93c44ff1
+      paragraphs:
+      - id: K4ZJEEWG6DMPFJKJKBNP2TOF4I
+        anchor: p-1
+        mfid: cce872975e1eb11f74f6c3058ed43217feb2f068631779ebc97f7a8968e46f27
+      - id: AHQEQYUZ4CYVCABBPI5G54DWEU
+        anchor: p-2
+        mfid: e3e215a3dc09861238b66593b874fe1e25c179b6aea5ff063aafa1e2a94da8a5
+      - id: ZKLAZGN7D6AL2OZKLZFUMIQ3DM
+        anchor: p-3
+        mfid: 81b28f67cb11759e7f95c7f692253f65f7d1413a367ea1ef0d87eed1bb19d585
+      - id: XEGQQET2QCJLSBRRNAEVAFI5KI
+        anchor: p-4
+        mfid: 7d51c7dd7f66024595046d1c3eb2532f00be22c75f5c3fe28f243dacf6a5bb8c
+      - id: OX6E2GN6YHQSAOO6APMB7UIXT4
+        anchor: p-5
+        mfid: d146ebefcc66a3d2e229fe890a9f2ea76c67c909258e7fcc5c7d876efd2cdf53
+  - id: 7X7P8HCSB193081DW592Y556ZG
+    key: PLGN
+    title: Plugin Contract
+    sections:
+    - id: T8QTM9Z414X70XF3E7FM38PMDD
+      key: '1'
+      title: Plugin Contract
+      file: docs/source/03-plugin-contract/00-plugin-contract.md
+      mfid: 536a5830ccc607732cc4646aade4e54ae49801b8561621405e756feb4a7668c4
+      paragraphs:
+      - id: AFA4SN9JTFN4DD0PJ7CMGWK7D2
+        anchor: p-1
+        mfid: eed51314a480a546150fd9f72073b20e8d7bfffc3765057abdc69c3bf4855f24
+      - id: G07ZHWFYP18FTTTMGQFK1F4H60
+        anchor: p-2
+        mfid: 1b1ad61143dbdf7b70a42b2205f64fd14803865241ebef79113f8e183bc2289f
+      - id: E3K2A6052WB9FRD6ZEVDZMM90V
+        anchor: p-3
+        mfid: 73ecc9bb93320ad72b905a82ef43a58aaed81f627c9e4f9695079ad7eb37a0cd
+      - id: 0K600VK7FCJYKAAJHTN0SNXW28
+        anchor: p-4
+        mfid: 51a98492841e46e4832682f5ce1f4ef79f20a678523f40610531837badf60468
+    - id: KD6IRHXRIHJJPFOU6OJUMOOEFY
+      key: '2'
+      title: CLI Surface
+      file: docs/source/03-plugin-contract/01-cli-surface.md
+      mfid: 29342d88ac590afde603692c0833236cc8142c52fe30b8a08e4e81ba8f9348f3
+      paragraphs:
+      - id: RBOZWXIWTXTTEXK7IZGLXXC5NI
+        anchor: p-1
+        mfid: be7a3484498ac48982a296305eaa78da9c4af734aaae67d74c360a62912eaf70
+      - id: J6JIAGID7IPDNGAWQPAKKDSKVE
+        anchor: p-2
+        mfid: 0aed0db7c85b6d8802720dcded61f290337056c74db2c84fd5f62e095ecfc2f6
+      - id: XHVUXMYULMJKGP3A35NPDIK5CU
+        anchor: p-3
+        mfid: 43910082cfb39dc3f57932d89aa4a3ceae8ee6b1e497ab1ad34e925f517bd492
+      - id: 5QM6RFD4QJEYCN32CAFGZCCCB4
+        anchor: p-4
+        mfid: bed9365e36b35b7e5790d09d4ae92fc924658a8cc1b4bc1baedd96b6c26e2ac2
+    - id: 5G33EDWBAK5EIH3QXQUQ5FKXMM
+      key: '3'
+      title: New Plugins
+      file: docs/source/03-plugin-contract/02-new-plugins.md
+      mfid: e8e30144ec0fd1794ed2053a7ce5086002c83a1dc99305f37342a5c490fd8b11
+      paragraphs:
+      - id: FUNEORXHAKPZP65FLQBOKOGNTI
+        anchor: p-1
+        mfid: 43c5c99f38fada798d0a883f0210a29c63ed6cdf8130882fdb0659f10b92984f
+      - id: BQVNNVMQRNAK7GYBBCEJMPGTSE
+        anchor: p-2
+        mfid: 2df5e27c355d462be6791b5bf3a38de376ab5beda596ede57ab920f760f8ff19
+      - id: GONWLP7RJY2Q3LLFHDGWCIL7UA
+        anchor: p-3
+        mfid: 77feef8dfe5058dbb033dae727adbd227cfecdef41d38b9e03d1a1109adc9b35
+      - id: EWH5UCA56A4B42YOOVWM5AE5TA
+        anchor: p-4
+        mfid: eddac07027f0dc8efe696263ec765d3f10e9ff8cbdac43b18ed79a8f4f433f3a
+      - id: PQAVVFXIIM6UG422OVHL5JQIFA
+        anchor: p-5
+        mfid: 6f7dbd8ec78f0aadaef261b40af35f6dd15f03d94b099cb7e1ce9646e871a19c
+      - id: 2BQXZ7EDLX2SGRRRMKDGLH62LU
+        anchor: p-6
+        mfid: 2ce2e658b517905c386cb2f6728734f7e32f072ac4619713a1cfe8bf079cd595
+      - id: L6GHQMQ6NIIONGJCNMCE7A7ITQ
+        anchor: p-7
+        mfid: 2ea10c707f0e997a0316fcd258b200d5d171f0f91abcc35942fa5b384e3aecdd
+      - id: 3D5TQYXTLYBM6ET7FWYSOQT4AI
+        anchor: p-8
+        mfid: e2346c149c70d18a8f30a1def320d7e037acd3c3523eed5aafc95714a0313bde
+      - id: M3ATBM2IUW7LBAEBVHUQR44R4U
+        anchor: p-9
+        mfid: 23f7416a05747817d7c6a900e6d96daa9713e9256b0cfe768d5e1c8e20daa595
+  - id: XQ53JA8MDTBZG798S0FQZPQTMB
+    key: DATA
+    title: Data Contracts
+    sections:
+    - id: 981ZCJGRRCGB0XYTCD2VCYDAJY
+      key: '1'
+      title: Doc Card Schema
+      file: docs/source/04-data-contracts/01-doc-card-schema.md
+      mfid: bb0cc356e80df0d71a32635d1b6c422b96fa130fc3cb8957613d5ff61a10e73f
+      paragraphs:
+      - id: 268K7K6R31AMP2Z2W61MN5RCTN
+        anchor: p-1
+        mfid: f3eff4564910c75942b6cc5d332581e5ffd67a023817763cdd7fd387d9839dd1
+      - id: 4CKXXT633KWWQ8KMAYHEPJJXZZ
+        anchor: p-2
+        mfid: 0697f4e00f7e0ee722a5c52bddf1e23190a23ab65caef76b9d697715eae509a8
+    - id: CDVNWWAV9H48XT222NC26XMGQZ
+      key: '2'
+      title: Ledger Event Schema
+      file: docs/source/04-data-contracts/02-ledger-event-schema.md
+      mfid: 1b1b735199bbd6095e03bcd97fd674f2c5f1687dbc2a2b55174eb8bd320e3a16
+      paragraphs:
+      - id: MG58JQJX5PRF0A5QX7KS2XABJV
+        anchor: p-1
+        mfid: fa0df98b774ca07b810a07b1ee30de39f1b82f47bbc5980b45b1b30618bbb940
+      - id: KRC22ABNFZJGESYPD8G07ZGZPT
+        anchor: p-2
+        mfid: b0ff50959641dc110809999ed15864d6c8b7b9d7e59c5286e591d4000342f71c
+    - id: BK90530X6PS2WCMGSPSZ4MR433
+      key: '3'
+      title: Registry
+      file: docs/source/04-data-contracts/03-registry-canonical.md
+      mfid: 20ce7d8bd2b26b39fd37d5e98e5abb16a38553bb66ae96b8651e1cbe686c2ea4
+      paragraphs:
+      - id: M30KR629KKM1Y8B3R1J7YRJ84N
+        anchor: p-1
+        mfid: 2b6bb7323539e5a82bad556198fcbcd8bea06cb879178385704ff46b96986b82
+      - id: SZJV49PJRGWEFQVDEE48S4PRV2
+        anchor: p-2
+        mfid: 5fe322c1af9fbf4101b3726e3af9fa76b47e119c326c4cd1bbb33e7c925bf1ee
+    - id: FV6KUWEREWFQGTUXSMOF22M2UA
+      key: '4'
+      title: DDS Example
+      file: docs/source/04-data-contracts/04-dds.md
+      mfid: 6b59f0b84a0240e2be3438b717d174e68f03610e8f7bb1a4a25aa3380bee241d
+      paragraphs:
+      - id: ATDDINZC5OOGRPOY4RRUDRQZEY
+        anchor: p-1
+        mfid: cea395e9ef68e6580fc772e63f426c73004bf9909a6b9d40f4bd96b15278c2f5
+      - id: V75I3WOBBTK2SYJGFYAERJ77M4
+        anchor: p-2
+        mfid: d68c89827653035b87f7fb47c89a2b6e5a2dd46851c983db3b0539d9ccad3d03
+      - id: S47DJHCITKSLUXCMM7X7J5Q55E
+        anchor: p-3
+        mfid: 170e5c4898864d5788565e474221fc29e4b7b881be4ef7eddae9f55949164f38
+      - id: P32VMPNWCIEAANNLIT5ZSM6ZEM
+        anchor: p-4
+        mfid: d6f8d8605b20994dc35039a39ebcc4d3b6836dade3f6b668402ac15bb6f1fd2a
+    - id: OUR3OANI43D6O4JIGTNIPDF6TM
+      key: '5'
+      title: Addenda
+      file: docs/source/04-data-contracts/05-addenda.md
+      mfid: 34d02b59826df9c77cbf9eae2a2dbcee8ee7df576667f20c1bb497f7b23d18a7
+      paragraphs:
+      - id: JJVX7SXVMC42KUXEMM5IYN72LY
+        anchor: p-1
+        mfid: 42893ff4ff9bb3daaa0dd66122a0dc3090e7959c758e5f5991043419d7513f42
+      - id: WE7VIB553WBOTJJFVWYXRCV5DQ
+        anchor: p-2
+        mfid: aeb62e2cdf08a9c2ee0870f2912faf45088a5a9560184187c23dfd572e98250d
+      - id: PWCL6XLWMUH3XBRUNETDB2N2TI
+        anchor: p-3
+        mfid: e060b4fba2628b2a3a6071f545add576d7245d14fe2c5baab8eb50cc905a65e6
+      - id: LIHXW3IJCV4XNMQK5M2XZKPQ7M
+        anchor: p-4
+        mfid: 6b3e4c115a9f5e9f2c8053ec266bcd9c4a2151e32d2e3aae4a8e4af40ddbf9a4
+      - id: C2POSCNL6U4TV52ER2FQ23TLTQ
+        anchor: p-5
+        mfid: 7437d97b780ba1538220a8e0654bec3f127c0f79065bd32aa4397a7e436669cc
+      - id: Z7SIPS4GI3U3VCW76KC7E5HDV4
+        anchor: p-6
+        mfid: 04ef196eb8cd0efe6e032767e2bb35aef0768dd773717a1f7dd79749c0fe02ba
+      - id: TZSKYISSU427VKVGGOOTOIZH2M
+        anchor: p-7
+        mfid: 28c1978d626176116ef0e8985d6344cf05737894db0347167948a57212721512
+      - id: 2SLV4IIIE5SGJGJE5UP6NHQEFE
+        anchor: p-8
+        mfid: 9ec39fce2ad51d2ba39ed108ae42d6b3b53afdb8a798e5e463698c37e8536004
+      - id: 5QQPL2CXYZEDXHCYQUGSFEO65A
+        anchor: p-9
+        mfid: 7b5086dd0f0774dc97a7599bb745521d742ea86fe92916f1e963badfec8aaea3
+  - id: 9FRVBH2ZRP1FHPGDMPHQ6GN32S
+    key: CICD
+    title: CI/CD Gates
+    sections:
+    - id: YPZJMQ9BDD9R7603E59A5XFW8Y
+      key: '1'
+      title: CI/CD Gates
+      file: docs/source/08-ci-cd-gates/00-gates.md
+      mfid: 8e73e138cc9a388b8384e4bdda91c47e92cbf401b1f7c9730780c31621654eb3
+      paragraphs:
+      - id: GH2NWC0BG8Y5DPZ3WJSAWH8NDY
+        anchor: p-1
+        mfid: 76d178e9be54e6316be3254159332da362198235b5f11829cd4be654332d4a32
+      - id: PET888R5GG4EHDTVWV8T3VK0Z3
+        anchor: p-2
+        mfid: 921f937111309b1d757f4ca94f2e4973d02c424332fe2304aee7d4727c7a296c
+  - id: 373D6GDWRAP5MHDJNK13FNM48G
+    key: OBS
+    title: Observability & SLOs
+    sections:
+    - id: ZSJ5RE4BZE9STS4CSCPFK6KGSN
+      key: '1'
+      title: Observability
+      file: docs/source/09-observability-slos/00-observability.md
+      mfid: 499220d68f7274a7b95b186cf98ec56601d7491257fd4fcc44eebcee2ee856d4
+      paragraphs:
+      - id: 3DY55PJYCJ9B88RZT3XRTVBVSN
+        anchor: p-1
+        mfid: 3dd3435d13f8eecbe1bfb19960df6abd92a56a9dc05e6558078eebc1cbe2fb1c
+      - id: FH52VCT0XJNKJ81DNH7BMH22Y5
+        anchor: p-2
+        mfid: 84bb4bf58b053cee7808494d7a8dbb7a58db6ab26e05f1cae307cf8b346d8ead
+      - id: ZGGJ6TOP6EENFA3O7IQV5ZD4OY
+        anchor: p-3
+        mfid: d94e58cbb78e1185b80929aa4bc9161f28369b814bc74e218b33725c1168844e
+      - id: 264Z7ANWCBEUCWOQSQRJAYEWUM
+        anchor: p-4
+        mfid: 84bb5f07426a3c0f41b0b52f3228f22a1dde48faeda04312025ec76302554eb9
+      - id: 4CH3N3HW57VJYDDLI4J7666QO4
+        anchor: p-5
+        mfid: b16570f76e097d967c46aeb3d83d94c320c882c49d7f7c84ade0a4ada5cd6800
+      - id: EVNO63YZEH3OGD4PUYLIBP6F3I
+        anchor: p-6
+        mfid: eb223956ca5076995557763868fdf76c20eec7604fc63a35a137dbc83b785149
+  - id: FPF2VQMK0BJBD8XT35EMTXG75E
+    key: DEV
+    title: Developer Experience
+    sections:
+    - id: CEE8CPPXXFV4XC2565E5WF0SHA
+      key: '1'
+      title: Developer Experience
+      file: docs/source/11-developer-experience/00-devx.md
+      mfid: 614782d86d7744148bb589c65ba1a5681b3d70c693e486cce218c5e1430a0f0e
+      paragraphs:
+      - id: 27YTHQQH15HSGR0TDMG3KHPSVN
+        anchor: p-1
+        mfid: 9fac42c54f712140a5d4768ad32ca2d67637feed4b6f6458e602f9da52385190
+      - id: T6APDAKAY0HW8VFR5BACJ9AWVC
+        anchor: p-2
+        mfid: 84df1b1108e8fed6699ddd1aa760273e84189dd793e9777e8cf21ca8914e48f9
+  - id: K1MRG2K0WC2BYPYHA27GWS6NTH
+    key: SEC
+    title: Security & Supply Chain
+    sections:
+    - id: WG2HCXZVT5K72MQYZR3HPNTEBB
+      key: '1'
+      title: Security & Policy
+      file: docs/source/12-security-supply-chain/00-security.md
+      mfid: 20e68c3ad2cb8682b6ce8327e6765d337e11279fa2e28134f3858a523d7118dd
+      paragraphs:
+      - id: JER979ZTBZZR0F4GXH6VS1X3J4
+        anchor: p-1
+        mfid: 3eec5f5ed01a2307b2a97f6c422c76dab19f862e5f9178ca943b77cdd289b442
+      - id: 14QSMBCF1H40HWQ9K2F088YSWC
+        anchor: p-2
+        mfid: 3b558942e5895647a7d049dde866eef4a1385006cae49c7fe96ca91f9168702f
+  - id: ASF4QV9ZMEPP6P6HTXZQTGAA3M
+    key: IMPL
+    title: Implementation Checklists
+    sections:
+    - id: 04RQN6QNTT8WE1VKBRVQGEP9WD
+      key: '1'
+      title: Definition of Done
+      file: docs/source/13-implementation-checklists/00-acceptance.md
+      mfid: a6f8af857490ee29bf5ef84c9491998fcf28cc39c57bc47b5ea848755b0a4397
+      paragraphs:
+      - id: PK93Y265TCVEE0W6376EZ56RKN
+        anchor: p-1
+        mfid: f1aa175550b4d145136c8bb6906d4925385e7715505eb687f5689a569c006fb5
+      - id: KMFPMY2F4KWSBA94F7ZWKSNMVS
+        anchor: p-2
+        mfid: a5f2df23bd0461d2614c6cbd2c813a4057513bdc60ab4a457de11e3a55d81190
+  - id: 4C7NJSTDTFEFYQ5LYZNQCMUBQY
+    key: PROC
+    title: Process & Decisions
+    sections:
+    - id: ELYRZE77KBIJIGFZTQKCTPYDVI
+      key: '1'
+      title: Process & Decisions
+      file: docs/source/05-process/00-process.md
+      mfid: dfa62efd74125cc2cea9ab06f7287663c57a09fc0ec4e77503f80e70f18a765e
+      paragraphs:
+      - id: QONP3LPQ7NUUY56XO7NJKDVV2I
+        anchor: p-1
+        mfid: ea98e8615d0cd6e39233becd5e9aedd38c7862b583f3b51c6685f6be93bd5b6b
+      - id: Z2YDPRREZ24P5K6MIRSNAROXGU
+        anchor: p-2
+        mfid: fe8a9aa2003cb8cb2bbb4dc4252d4f8dab155b307f8c5d1321a76e953a8fb11c
+      - id: TV2DMMYJ3KCMBYBNDMXIWGLG2Q
+        anchor: p-3
+        mfid: c8ebe4c83f25dec37928709dbf43d4a9ee55fbf2ae2adaaf205aba9590e5c045
+      - id: 74CLHRQBECOHQHMFU3O4HFTSBY
+        anchor: p-4
+        mfid: 460577bba2dd6bea8aada184a873434cfb2060d29bc151815f39eecd6943ae90
+      - id: RTIFADQGZXOFEPWCKDMHXFMG4U
+        anchor: p-5
+        mfid: 904f41c2430f188a67ab366136e9689325ff734254e8df794106b52ee9181b3d
+      - id: WNOXKJ4P64FKAXKOMPECXUKWZE
+        anchor: p-6
+        mfid: c9ded522f4641bccb9d17225b3a20b2eb8d82ee71c9445f5e5f1e0c2f99f31bc
+      - id: 4TZ5FDKWDH57M3PGF7KSTPPNKM
+        anchor: p-7
+        mfid: 810b5e43f50cb8d418c624e3e6ac533c59b7998ad9f84a2223e49536a249d71d
+      - id: FQXWFJ4MWQW6UG33RXH3XQIBBY
+        anchor: p-8
+        mfid: fc04abd90e1c6b4d992a50d69da35cd8cfe732eeaeaebf96a1df244f4bbcd5ba
+      - id: V4FAV52GQY3NWBN5EU3Q45MDFM
+        anchor: p-9
+        mfid: 10d6d70eb75a4a9330381c21146df12004ffd3fcf4afeabab58951f618557e3d
+  - id: 72HMTVKCI2DIQGHTTHFMVG436M
+    key: CONF
+    title: Conformance & Compatibility
+    sections:
+    - id: JGAPCLYGHTU4OVGNSYFWPFGN2U
+      key: '1'
+      title: Conformance Kit
+      file: docs/source/06-conformance/00-conformance-kit.md
+      mfid: 572f2334639a73ec0e4c6e001556ad8bb7e3f368629372fd49d80950fd69312c
+      paragraphs:
+      - id: KBCEMJBCLH4GVEYA2NQQOSIRGU
+        anchor: p-1
+        mfid: 3854e709d5ff1b8e5499400bf6a09189458bc55a86b36afc3feb3c48c39befa8
+      - id: ALPKZ43YOKZIJ7LCVUUNJBQR4Y
+        anchor: p-2
+        mfid: 3c03ca842c29c97bde0a8c1ec936a1a66c791b6f2e3373304a5dc8e6a706ebc1
+      - id: Q2BD43QVDNNAGG27ZNXMZ77TQA
+        anchor: p-3
+        mfid: a67a3d48e63be37ea6486270a51a6949d993fa6811d90562f1b817ee61f9850d
+      - id: JY7R2LPC73Y2BLUR4XITMRVRNY
+        anchor: p-4
+        mfid: bad73f01bcca93a5c571f5336f9067e68b40bd0d97e6455e06e2fa46394df39d
+      - id: HGQJBQLKU3ZDQNBAEZNJ4OX2KU
+        anchor: p-5
+        mfid: a91d3ac1e50733ce717bfff289c0b82611a359b03d7407913bfe432020aed44e
+      - id: 6KHWO35CRL5OASRFLLYH4FQ6TI
+        anchor: p-6
+        mfid: 6cbaa2128ad14cbaa9a9d807ff8558ed02eccdadb8c988332f10006d2a386ae3
+  - id: 77MUBXJ7F23O6EWWB2RC6BDPCA
+    key: POL
+    title: Policy & Taxonomy
+    sections:
+    - id: SEAITYDVBBPTYNGPPMZMVA4WGE
+      key: '1'
+      title: Policy-as-Code
+      file: docs/source/07-policy/00-policy-as-code.md
+      mfid: b3b9b46bf1dd1b2077a192ac68922e9a37c8203c13acab3937cd4f82ce12746e
+      paragraphs:
+      - id: UW5CQWVMRH2YTZQX7QRAVXMIK4
+        anchor: p-1
+        mfid: f6b56cc24a10a5bb6cc4e80fbb110a6717c1e77c95624c91bb5f10efd7de777e
+      - id: 752BUSQM2H7Z6BT4MS2P5PIZMQ
+        anchor: p-2
+        mfid: ed72eea7173ef0b2b0d160e5c6d103f425d19a635d9cd4bcf4d50f5552a412dc
+      - id: DFI7JJ5NLOSKQBCAT4L2POS6QE
+        anchor: p-3
+        mfid: 0091226274388bd47af62f0f05ed57d82e7e53ec2d69af413fc6aa33ff15e5e0
+      - id: 5MZC25F3HWUS4KJCRBTTGYASUA
+        anchor: p-4
+        mfid: 23e9cda16aaa9e6a611685c98aefc7a7b870bfe274bf2d107aeda02e2c5e4172
+    - id: 746SW4CDMADH5KRNLTUYTNZB2I
+      key: '2'
+      title: Taxonomy & Index
+      file: docs/source/07-policy/01-taxonomy-index.md
+      mfid: 005792e266e69fae55610d3c989b8041d0694b96dcfc95a99b4b1fd67835e765
+      paragraphs:
+      - id: KPG3YC2K6Y2TVVYBP5ZS3OQDM4
+        anchor: p-1
+        mfid: c0bdac258fd5e4a0f4f3e11c92532f80593d688c309997ffede49b3de2170310
+      - id: GZGIVZ7JLCK3EEWQZYKJID7BCE
+        anchor: p-2
+        mfid: a3ec4f9a3f352f0995bf5f9d6c1210b2bd3f2fcb2e0ab1666ed41c705e17fbe3
+      - id: XSDCBTCYAT7ICRCZLOD5FAIUVM
+        anchor: p-3
+        mfid: b8b2da721ea2de1b07b032152ca7c13e87ceb21a59d2769f24d4666b2c940b64
+  - id: 73HCFZMHR74LZ2CIDMMWB2MKNU
+    key: REF
+    title: Reference
+    sections:
+    - id: WJQOYFHSQ54Z2NEEMUUBHT2W24
+      key: '1'
+      title: File Tree
+      file: docs/source/10-reference/00-file-tree.md
+      mfid: 742ccd13cd1240dab855aecaf76d4029f9d2bf09f67d75b36b97316030d5c36c
+      paragraphs:
+      - id: OEAEPP2TVRZAXVKM6IDCQOEEUA
+        anchor: p-1
+        mfid: 82a36adf396e6da025b80985152383ffa964e8e43622a0672e94203177c442a5
+      - id: LZNJBDYSW5OFYY6OZXO5JOOLVM
+        anchor: p-2
+        mfid: 438e14afc123ec46ebebbfe3b83676dff143fa6cd9a20ba95d17c5bced9e4abc
+      - id: E2ZGQZJFYLETNEP2DVBS4Y4G3Q
+        anchor: p-3
+        mfid: 41a0dd507719c94d73ca7dc210250ff529507714af4172212c11b4c628a6d78c
+    - id: XS5QIHXSS7CRRQ6LLJSTVQXSKE
+      key: '2'
+      title: File Purpose
+      file: docs/source/10-reference/01-file-purpose.md
+      mfid: 4aebd43b652eacf69baa118aa4af40bec31b1fc61e5dc52c42f657f7b966b8d1
+      paragraphs:
+      - id: 567OG5NVQ22GJGH23YYWEBNMPY
+        anchor: p-1
+        mfid: 8e7971430cfa7f962b340c2d01e4f098d8005c69e4adfbdd9a71c400b9d0e36a
+      - id: ADI42AFMMVERO7DKOVVCIMWLGE
+        anchor: p-2
+        mfid: 97b7aacd0e621985bcdaa096a6d9acdbf485072a7ed7acb456923a8220b35158
+      - id: XAGNSPBLIHQWCDQ77UQJYIY5WU
+        anchor: p-3
+        mfid: 3c1b82cd918f0ca5a51b889b424c2de23d3d97ba1bdfe53cbf659c958ab78ee4
+    - id: EKABNJ7FIDXFNUPL3HFF2VA5TA
+      key: '3'
+      title: Plugin Manifest
+      file: docs/source/10-reference/02-plugin-manifest.md
+      mfid: 9d7ab229bb47fea93736d92f1ee38cdc42b9fa43f5dc0f0ca89ee558ac899cc0
+      paragraphs:
+      - id: KJMAZMID33WENFPEJOWKIA6OB4
+        anchor: p-1
+        mfid: 429549e5442088a20544bf7ffc2c04a4eae677df7dd4a1390b6d028cee0414ba
+      - id: TPTUIU3P6VFNOZOLMJTKYTVJFQ
+        anchor: p-2
+        mfid: 4574bff96a1e8a7a7a138a67621bce372a4baa8ef675a2d0c1f771cdf921cae3
+      - id: RWTDS3YQO4NUKOQOR5P326TLOI
+        anchor: p-3
+        mfid: 73ecc9bb93320ad72b905a82ef43a58aaed81f627c9e4f9695079ad7eb37a0cd
+      - id: ZRZCBPN4XKVZQMPV4RAYP56I7M
+        anchor: p-4
+        mfid: d49c74772dd772064fb9015a6af381a114543f24802aa4e613c6aebb14aaa912
+    - id: REKEOWIQXOFZWNQSWEQ4SXC2SE
+      key: '4'
+      title: Workflows
+      file: docs/source/10-reference/03-workflows.md
+      mfid: 3d66d615d539ae9cdc39396a975397c3ca892757f73daa730da8dc89aee81c8a
+      paragraphs:
+      - id: 6XHYKWBBW5HHV5C6MLLWQ7U2XY
+        anchor: p-1
+        mfid: 0db83ac159958cc47bba214c92f7c3824357e46516041cf9133c9e6212f54315
+      - id: 6XVYZWTEMFUYDKSLEIZDNPERIA
+        anchor: p-2
+        mfid: 13a2c6b78fb280deaa390a32e61afd8a660fa6bf4fe06837d25862b3cc163cc8
+    - id: N4B63H45FCDFYIPNPMPEATSSRY
+      key: '5'
+      title: Implementation Notes
+      file: docs/source/10-reference/04-implementation-notes.md
+      mfid: 4a24f56d01c1fb639fa678641dfa66a39a99acadfca4d4ef84a253ea25c23d56
+      paragraphs:
+      - id: PCDYFY6YJ7YE6FZG6MFG3VTDJU
+        anchor: p-1
+        mfid: 23dafa83811b9cadffbcf97c12f62d09bdf1e5cefc3d98767991262725a3d9c6
+      - id: TWUKFW745BI7PDHYAUUBSCRF6A
+        anchor: p-2
+        mfid: d848d0f307c0f59ceefca4425e049bd0415ee9193d3d9f525166315db1964968
+    - id: LDFN2EVKMBJUAGVKXGU4TSSSSM
+      key: '6'
+      title: Deliverables
+      file: docs/source/10-reference/05-deliverables.md
+      mfid: 5442826dab1444b68bca80969b73dbab58e7079a78c212822f4e77702e46cc3a
+      paragraphs:
+      - id: XNWXURZHRUFP5N42WEDITSD4YU
+        anchor: p-1
+        mfid: 45bad18a77707f5b7e66ffe5f0497cb081f48008be7d73f6dd66b42e5adfa616
+      - id: IJ7GWSN22VPFNBOR72L73CKFIY
+        anchor: p-2
+        mfid: a83f7d52536cb460c8d84755e3fdf31b39c4f35f3802c36006ab5fd773ce3660
+    - id: 3EVJNBFOZX6MDI3YIFR7QOLTJA
+      key: '7'
+      title: Risk Mitigation
+      file: docs/source/10-reference/06-risk-mitigation.md
+      mfid: 48112c2d053ce29371cba2fb0b29806292ce4977b15984e512ffcaac56f417a3
+      paragraphs:
+      - id: 6ZCB4LVYI6PMZBQ2MWTEYAIGHA
+        anchor: p-1
+        mfid: 63ee7bb5f52bd86e978898988b236b93243b17aae996e1aa81dd40c2fe5c9890
+      - id: N2DOCLRI5O7LJHIZAGMDLOJZ7A
+        anchor: p-2
+        mfid: c89ab67f15ccc38831ef55845fc48b2cfb0ec9119e266de04fc8f84b742be22e
