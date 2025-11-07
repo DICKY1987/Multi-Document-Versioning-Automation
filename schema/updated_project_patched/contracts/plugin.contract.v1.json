@@ -1,0 +1,36 @@
+{
+  "$id": "urn:plugin.contract.v1",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Plugin Contract v1",
+  "description": "Defines the handshake between the platform kernel and a plugin.",
+  "type": "object",
+  "properties": {
+    "apiVersion": {
+      "type": "string",
+      "description": "Version of the contract specification; e.g. 'v1'."
+    },
+    "range": {
+      "type": "string",
+      "description": "SemVer range of API compatibility supported by the plugin."
+    },
+    "schemaVersion": {
+      "type": "string",
+      "description": "Version of the manifest schema that the platform understands."
+    },
+    "capabilities": {
+      "type": "object",
+      "description": "Supported capability flags for this plugin.",
+      "properties": {
+        "handles": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "emits": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    }
+  },
+  "required": ["apiVersion", "range"]
+}

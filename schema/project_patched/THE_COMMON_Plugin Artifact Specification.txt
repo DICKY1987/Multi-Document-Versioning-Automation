@@ -1,0 +1,219 @@
+# Module + Plugin Artifact Specification (Baseline & Related Files)
+
+## 0. Scope & Audience
+
+This document defines the **canonical set of artifacts** for a single plugin and the **shared, repo-level** assets that govern all plugins. It is written for maintainers, contributors, and automation agents that create, validate, publish, and audit plugins in a **deterministic** and **template-driven** module + plugin architecture.
+
+---
+
+## 1. Terminology
+
+* **Plugin**: A self-contained extension packaged with a manifest, code, tests, and documentation.
+* **Operation (`<op>`)**: A discrete capability exposed by a plugin (e.g., `mint`, `validate`, `transform`).
+* **Baseline artifacts**: The invariant, per-plugin files that exist in every plugin folder.
+* **Conformance**: Extended, scenario/performance checks beyond unit/contract tests.
+* **Repo-level assets**: Single sources of truth and pipelines shared by all plugins.
+
+---
+
+## 2. Per-Plugin Baseline (Invariant — present in every plugin)
+
+> Location: `plugins/<plugin_key>/…`
+> Ownership: the plugin’s maintainers; CI validates and publishes.
+
+1. **`plugin.spec.json`**
+
+   * **Purpose**: Single source of truth for the plugin (name, version, events/operations handled, allowed actions, config schema).
+   * **Creation**: Hand-edited and/or generated from templates; treated as authoritative.
+   * **Validation/Gates**: JSON Schema validation; contract compatibility; uniqueness of IDs/keys.
+
+2. **`manifest.json`**
+
+   * **Purpose**: Runtime-ready, **derived** manifest (entry points, compatibility ranges, capabilities, checksums).
+   * **Creation**: Generated from `plugin.spec.json` (never hand-edited).
+   * **Validation/Gates**: Checksums match; version constraints resolvable; loader smoke test.
+
+3. **`ledger_contract.json`**
+
+   * **Purpose**: Audit/telemetry schema the plugin must emit (fields, types, required keys).
+   * **Creation**: Derived from spec + policy; stable once published.
+   * **Validation/Gates**: Schema lint; required fields present; append-only event compatibility.
+
+4. **`policy_snapshot.json`**
+
+   * **Purpose**: Frozen, resolved policies (security, quality, performance) at generation time for **reproducible** runs.
+   * **Creation**: Generated during build; reflects repo-level policy packs.
+   * **Validation/Gates**: Digest recorded; snapshot date/version captured.
+
+5. **`README_PLUGIN.md`**
+
+   * **Purpose**: Human-readable quickstart (purpose, inputs/outputs, config options, examples).
+   * **Creation**: Generated from `plugin.spec.json` + templates; manual notes allowed in designated sections.
+   * **Validation/Gates**: Links resolve; example commands reference real files.
+
+6. **`healthcheck.md`**
+
+   * **Purpose**: Declares health probes and pass/fail criteria used by local/CI smoke checks.
+   * **Creation**: Generated from spec + policy; may include manual notes.
+   * **Validation/Gates**: All probes executable; thresholds consistent with `policy_snapshot.json`.
+
+7. **`src/` (handler with AUTO fences)**
+
+   * **Purpose**: The plugin’s implementation entry; AUTO-fenced blocks are tool-managed, developer areas are clearly marked.
+   * **Creation**: Scaffolded; developers implement logic within allowed regions.
+   * **Validation/Gates**: Lint/type checks; unit tests; contract tests; no edits to AUTO regions.
+
+8. **`tests/` (unit + contract)**
+
+   * **Purpose**: Minimal but complete verification of API/contract behavior and core logic.
+   * **Creation**: Scaffolded, then extended by maintainers.
+   * **Validation/Gates**: Must pass locally and in CI; coverage thresholds (as defined by policy).
+
+9. **`conformance/` (schemas + behavior/perf tests)**
+
+   * **Purpose**: Extended certification (schema fixtures, BDD scenarios, performance budgets).
+   * **Creation**: Seeded by templates; expanded as operations and edge cases grow.
+   * **Validation/Gates**: Scenario pass/fail recorded; perf SLOs enforced.
+
+---
+
+## 3. Per-Plugin Operation-Level Artifacts (Conditional — created when the plugin exposes operations)
+
+> Location: `plugins/<plugin_key>/schemas|examples|tests|conformance`
+> Naming: use the operation token `<op>` (e.g., `mint`, `validate`).
+
+1. **`schemas/<op>.in.schema.json` & `schemas/<op>.out.schema.json`**
+
+   * **Purpose**: Contracted I/O per operation (input and output JSON Schemas).
+   * **Presence Rule**: Required whenever an operation accepts input or returns output.
+   * **Validation/Gates**: Schema lint; referenced by tests/fixtures; versioned for compatibility.
+
+2. **`examples/<op>_request.json` & `examples/<op>_response.json`**
+
+   * **Purpose**: Canonical fixtures tied to the corresponding schemas.
+   * **Presence Rule**: At least one request/response pair per operation.
+   * **Validation/Gates**: Must validate against the schemas; used by README examples and smoke tests.
+
+3. **`tests/test_<op>.py` (or language equivalent)**
+
+   * **Purpose**: Unit/contract test skeleton per operation, referencing the schemas and examples.
+   * **Presence Rule**: One file per operation (or grouped by feature, per team convention).
+   * **Validation/Gates**: Must pass in CI; negative/edge cases added as coverage grows.
+
+> **Conformance growth**: Additional BDD `.feature` files, property/chaos tests, and perf budgets may be added under `conformance/` as the operation’s scope increases.
+
+---
+
+## 4. Repo-Level (Shared, Required by All Plugins)
+
+> Location: repository root (single copy for the module); consumed by all plugins.
+
+### 4.1 Identity Stores (authoritative & generated)
+
+* **`ids/cards/<ULID>.yaml`** — Committed **ID Cards** (immutable identity records).
+* **`.ledger/ids.jsonl`** — Append-only provenance of identity operations (committed history).
+* **`ids/registry.yaml`** — **Generated** registry on merge/release; authoritative index of IDs/paths/versions.
+
+### 4.2 Module Scripts (enforced locally and in CI)
+
+* **`scripts/ids/ensure_immutability.py`** — Fails changes that violate immutability rules.
+* **`scripts/ids/validate_structure.py`** — Validates directory/file conventions and schema conformance.
+* **`scripts/ids/build_registry.py`** — Rebuilds the identity registry from committed sources.
+
+### 4.3 CI Pipelines (policy + release)
+
+* **`.github/workflows/id-guard.yml`** — PR checks: schema, immutability, uniqueness, **one-artifact rule**.
+* **`.github/workflows/id-post-merge.yml`** — Post-merge: rebuilds registry, pushes immutable tags.
+* **`.github/workflows/id-release.yml`** — Release: packages plugins and publishes docs.
+
+> **Role**: These assets ensure **consistency, immutability, and auditability** across all plugins. They are **not duplicated** inside each plugin.
+
+---
+
+## 5. Optional / Generated Run Artifacts (Not hand-edited)
+
+> Location: `.runs/<RUN_ID>/…` (job/workflow outputs)
+
+* **`.runs/<RUN_ID>/ids.json`** — Runtime snapshot produced by smoke or integration jobs; includes trace/run IDs and the resolved identities used during execution.
+* **Nature**: Ephemeral or retained per policy; **never** edited by hand; tied to telemetry and provenance.
+
+---
+
+## 6. Directory Layout (Illustrative)
+
+```
+/plugins/
+  <plugin_key>/
+    plugin.spec.json
+    manifest.json
+    ledger_contract.json
+    policy_snapshot.json
+    README_PLUGIN.md
+    healthcheck.md
+    src/
+    tests/
+    conformance/
+      schemas/
+      examples/
+      behavior/
+      perf/
+/ids/
+  cards/
+  registry.yaml
+/.ledger/
+  ids.jsonl
+/scripts/ids/
+.github/workflows/
+.runs/
+```
+
+---
+
+## 7. Naming & Identification Conventions (Summary)
+
+* **Shared signature** for document type (e.g., all manifests clearly identifiable by name and/or `doc_key` token).
+* **Plugin/Core linkage** encoded in `plugin.spec.json` keys and reflected in filenames where appropriate.
+* **Operation token `<op>`** standardizes schemas/examples/tests per capability.
+* **Immutability**: Generated artifacts (manifests, snapshots, registries) are **derived** and validated; committed histories (.ledger) are append-only.
+
+---
+
+## 8. Minimal Compliance Checklist (Per Plugin)
+
+* Baseline nine artifacts present and valid.
+* For each operation: I/O schemas + canonical examples + tests exist and pass.
+* Conformance folder present; performance/BDD added as scope requires.
+* No edits to generated or AUTO-fenced regions.
+* Repo-level guards pass (immutability, uniqueness, one-artifact rule).
+* Registry & tags reflect the merged state.
+
+
+
+
+/plugins/
+  <plugin_key>/
+    plugin.spec.json
+    manifest.json
+    ledger_contract.json
+    policy_snapshot.json
+    README_PLUGIN.md
+    healthcheck.md
+    src/
+    tests/
+    conformance/
+      schemas/
+      examples/
+      behavior/
+      perf/
+/ids/
+  cards/
+  registry.yaml
+/.ledger/
+  ids.jsonl
+/scripts/ids/
+.github/workflows/
+.runs/
+
+---
+
+**This specification captures the core file sets and their roles using the same level groupings you requested: (1) Per-plugin baseline, (2) Per-plugin operation-level, (3) Repo-level shared, and (4) Optional/generated run artifacts.**

@@ -1,0 +1,21 @@
+# Vulnerability Budgets Policy (issue 13)
+#
+# This policy defines acceptable vulnerability levels for
+# dependencies used in this repository. The CI pipeline should
+# enforce that no component exceeds these budgets. Severity is as
+# defined by the CVSS rating.
+
+budgets:
+  critical: 0   # zero critical vulnerabilities allowed
+  high:     0   # zero high vulnerabilities allowed
+  medium:   5   # up to five medium vulnerabilities allowed
+  low:      10  # up to ten low vulnerabilities allowed
+
+exceptions:
+  # specify known-vulnerable packages and a rationale for temporary
+  # allowance. Include an expiry date.
+  # example:
+  # - package: "example-lib"
+  #   severities: ["high"]
+  #   rationale: "Used in testing only; patched in next release"
+  #   expires: "2026-01-01"

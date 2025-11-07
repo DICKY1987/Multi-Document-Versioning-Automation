@@ -1,0 +1,143 @@
+Certainly. Here is the list of missing capabilities and proposed additions, numbered by section:
+
+---
+
+## 1. Cross-repo "propagation" rules
+[cite_start]There’s no shipped capability that updates downstream docs/files when an upstream doc or spec changes[cite: 1].
+* [cite_start]**Proposed Addition:** Add a `docs.propagate` plugin and a rules map like `rules/propagation.map.yml`[cite: 2].
+
+---
+
+## 2. Unified error model for plugin operations
+[cite_start]A repo-level, shared error taxonomy (codes, retriable vs. fatal, human-actionable) is not defined for all plugins, even though per-operation I/O schemas and examples exist[cite: 3].
+* [cite_start]**Proposed Addition:** Add `contracts/error.contract.v1.json` and require each operation to reference it[cite: 4].
+
+---
+
+## 3. Compatibility matrix & policy (declared, not specified)
+[cite_start]The compatibility matrix and signed artifacts are mentioned, but a concrete format or CI gate for them is missing[cite: 5].
+* [cite_start]**Proposed Addition:** Add `/contracts/compatibility.matrix.yaml` and `.github/workflows/compat-matrix.yml`[cite: 5].
+
+---
+
+## 4. Supply-chain hardening, signatures, SBOMs (scattered, not enforced)
+[cite_start]SBOM/attestation is suggested but not integrated into the common plugin baseline or release workflows[cite: 6].
+* [cite_start]**Proposed Addition:** Extend `id-release.yml` (and the general release flow) to generate SBOMs (`syft`), scan (`grype`/`trivy`), sign (`cosign`), and publish attestations[cite: 6].
+* [cite_start]**Proposed Addition:** Add `sbom/` and `policy/slsa.yml`[cite: 7].
+
+---
+
+## 5. Secrets and credentials policy
+[cite_start]A repo-level policy is missing for handling GitHub/Cloud secrets (rotation, scopes, local `.env` rules)[cite: 8].
+* [cite_start]**Proposed Addition:** Add `policy/secrets.yml` plus a `README` section and a CI check to fail on plaintext credentials[cite: 8].
+
+---
+
+## 6. Retention & privacy for ledgers/registries/run snapshots
+[cite_start]While cards/ledger/registry/run snapshots are defined, a retention/redaction/PII policy for them is not[cite: 9].
+* [cite_start]**Proposed Addition:** Add `policy/retention.yml` and a scrubber in release CI to enforce redaction on public artifacts[cite: 10].
+
+---
+
+## 7. Schema/versioning policy for breaking changes in op contracts
+[cite_start]SemVer is rigorous for documents, but an equivalent **"contract SemVer"** and deprecation policy for operation schemas is not spelled out[cite: 11, 12].
+* [cite_start]**Proposed Addition:** Add `contracts/op-schema.versioning.md` and a CI rule that blocks breaking changes unless `contract-major` is tagged[cite: 13].
+
+---
+
+## 8. Plugin deprecation/EOL process
+[cite_start]Unlike documentation, plugins lack defined deprecate/replace/absorb workflows and required notices[cite: 14].
+* [cite_start]**Proposed Addition:** Add `policy/plugin-lifecycle.yml` and a `plugins.registry.yaml` that includes `status`, `replaces`, and `superseded_by`[cite: 14].
+
+---
+
+## 9. Sharding & size thresholds
+[cite_start]The concern about splitting large modules/plugins is not captured as a policy[cite: 15].
+* [cite_start]**Proposed Addition:** Add `policy/sharding.yml` (file count/size/op count thresholds; auto-split rules) and have `id-guard.yml` warn/fail when thresholds are exceeded[cite: 16].
+
+---
+
+## 10. State-change safety rails (enforcement)
+[cite_start]Framework guidance exists for "state change" operations (like `-WhatIf`/`Confirm`, idempotence, rollback), but it's not enforced in templates or CI[cite: 17].
+* [cite_start]**Proposed Addition:** Add a template rule set and tests under `conformance/behavior/state_change.feature`[cite: 18].
+
+---
+
+## 11. Central CODEOWNERS and branch protection reference
+[cite_start]Front-matter requires the owner to match `CODEOWNERS`, but no sample `.github/CODEOWNERS` or branch-protection policy is included[cite: 19].
+* [cite_start]**Proposed Addition:** Add `.github/CODEOWNERS` and `policy/branch-protection.yml`[cite: 19].
+
+---
+
+## 12. Observability standards (present, but not codified as tests)
+[cite_start]OpenTelemetry (OTel) spans/attributes are described for ID plugins, but not as a repo-level conformance rule[cite: 20].
+* [cite_start]**Proposed Addition:** Make it a conformance rule: `conformance/behavior/observability.feature` that verifies required attributes and trace linkage to `.runs/<RUN_ID>`[cite: 20].
+
+---
+
+## 13. Dependency update & vulnerability policy
+[cite_start]Renovate/Dependabot config and a vulnerability budget are missing[cite: 21].
+* [cite_start]**Proposed Addition:** Add `.github/dependabot.yml` or `renovate.json`, `policy/vuln-budgets.yml`, and a CI job to fail when budgets are exceeded[cite: 22].
+
+---
+
+## 14. Readme/Healthcheck → Acceptance linkage
+[cite_start]Readme and healthcheck exist, but there's no required linkage to op schemas/examples (as living tests)[cite: 23].
+* [cite_start]**Proposed Addition:** Add a lint that ensures `README` examples validate against `schemas/<op>.{in,out}.schema.json` and run via `tests/test_<op>.py`[cite: 24].
+
+---
+
+## 15. Standardized "policy snapshot" ingestion at runtime across modules
+[cite_start]The Docs module can snapshot "policies in force" into a run ledger, but this isn't mandatory for all modules to guarantee run reproducibility[cite: 25, 26].
+* [cite_start]**Proposed Addition:** Add `runtime/policy_snapshot.capture.py` and call it from each workflow[cite: 26].
+
+---
+
+## 16. Global contract doc for loader/handshake
+[cite_start]The Docs module's manifest shape includes a contract range (`">=1.0 <2.0"`), but this isn't extracted into a shared contract for all plugins[cite: 27].
+* [cite_start]**Proposed Addition:** Extract this into a shared `/contracts/plugin.contract.v1.json` and require every plugin (not just docs) to declare a compatible range[cite: 28].
+
+---
+
+## 17. Concrete threat model & security review checklist
+[cite_start]A concrete threat model and security review checklist are needed[cite: 29].
+* [cite_start]**Proposed Addition:** Add `security/threatmodel.md` plus `conformance/security/` tests, and gate merges on the checklist for stateful plugins[cite: 29].
+
+---
+
+## 18. Release channels & migration notes
+[cite_start]Alpha/beta/ga channels, "migration.md" templates per plugin, and a CI gate requiring migration notes on **MAJOR** bumps are not defined[cite: 30].
+* [cite_start]**Proposed Addition:** Define release channels, migration templates, and a CI gate that requires migration notes on **MAJOR** bumps (mirroring doc SemVer rules)[cite: 30].
+
+---
+
+## 19. Test depth policy (property/fuzz/chaos)
+[cite_start]The mention of property/chaos tests is not codified as policy with minimum test counts for higher maturity levels[cite: 31].
+* [cite_start]**Proposed Addition:** Add `policy/testing-levels.yml` to standardize L0–L3 maturity levels[cite: 32].
+
+---
+
+## 20. Generated docs for policies/contracts
+[cite_start]The "published site + registry + ledger + badges" pattern for the Docs module should be replicated for the whole plugin ecosystem[cite: 33].
+* [cite_start]**Proposed Addition:** Add `/docs/plugins/*` generation in `id-release.yml`[cite: 34].
+
+---
+
+## 21. Fully Autonomous Release
+[cite_start]The packaging/release process is automated, but a small code-generation step (spec → manifest/handlers/tests) still needs to be wired into CI to make it fully autonomous[cite: 35].
+* [cite_start]**Proposed Addition:** Wire the code-gen step into CI (this can be added without reworking the design)[cite: 35].
+
+---
+
+## 22. Schema Version Information in File
+[cite_start]If version information isn't displayed in the actual schema file, it can be added without major changes[cite: 36].
+* [cite_start]**Solution:** Add a non-breaking annotation (e.g., `x-schema-semver`) and/or encode the version in the schema’s `$id`/URN[cite: 36]. [cite_start]JSON Schema validators ignore unknown annotation keywords, so this is backward-compatible[cite: 37].
+
+---
+
+## 23. Schema ID and Field IDs in File
+[cite_start]If the schema ID and field IDs aren’t displayed in the schema file, they can be added without major changes[cite: 38].
+* [cite_start]**Solution:** Put a stable `$id` at the top level[cite: 39]. [cite_start]For fields, add deterministic IDs via `$anchor` (standard) or `x-field-id` (annotation) on each property, which can be generated from `hash(schema_id + JSON Pointer)`[cite: 39, 40]. [cite_start]These additions are backward-compatible and don’t require changing existing instance data[cite: 40].
+
+---
+

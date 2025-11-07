@@ -1,0 +1,26 @@
+# Configuration Management Policy (issue 28)
+#
+# Defines where configuration parameters live, their precedence, and
+# how they are reloaded. Sensitive configuration values (secrets)
+# must follow the secrets policy.
+
+sources_precedence:
+  - environment_variables
+  - plugin_config_file
+  - plugin_defaults
+  - kernel_defaults
+
+format:
+  preferred: "yaml"
+  allowed: ["json", "toml"]
+
+hot_reload:
+  supported: true
+  mechanism: |
+    Plugins must watch their configuration files for changes and
+    reload state via `activate()` and `deactivate()` methods.
+
+sensitive_fields:
+  prefix: "secret_"
+  # any configuration key starting with this prefix will be treated
+  # as secret and redacted in logs and snapshots.

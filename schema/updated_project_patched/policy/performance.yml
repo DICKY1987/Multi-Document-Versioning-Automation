@@ -1,0 +1,25 @@
+# Performance SLO & Concurrency Policy (issue 27)
+#
+# Defines service level objectives (SLOs) for operation latency,
+# memory usage, and throughput. It also establishes a concurrency
+# model for handlers.
+
+budgets:
+  latency_ms:
+    default: 1000         # operations should complete within 1s
+    max: 5000             # hard limit before timing out
+  memory_mb:
+    default: 128          # expected memory usage for a handler
+    max: 512              # maximum allowed memory
+  throughput_ops_per_sec:
+    default: 10           # expected sustained operations per second
+
+concurrency:
+  model: "per-op"
+  default_concurrency: 1
+  max_concurrency: 5
+  scaling:
+    strategy: "fixed"
+    note: |
+      Future versions may introduce adaptive concurrency based on
+      load and resource availability.

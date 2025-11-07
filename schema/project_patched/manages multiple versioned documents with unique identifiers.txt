@@ -1,0 +1,341 @@
+I'll search the project knowledge for information about the versioning contract and the documentation management system.Based on my review of the project knowledge, I can help you create an automation system that manages multiple versioned documents with unique identifiers. Here's what I found and how to implement it:
+
+## Current System Overview
+
+The **VERSIONING_OPERATING_CONTRACT** describes a single-document versioning system where each document has:
+- **doc_key**: Unique identifier (e.g., `OC_CORE`, `PIPELINE_POLICY`)
+- **semver**: Version number (MAJOR.MINOR.PATCH)
+- **Front-matter metadata**: Status, effective date, owner, etc.
+
+The **R_PIPELINE** and **Modification Plan** systems show how to automate changes, but they need to be adapted for multi-document management.
+
+## Solution: Multi-Document Versioning Automation
+
+Here's how to create the automation system:
+
+### 1. **Document Registry Module** (New)
+
+Create a centralized registry that tracks all versioned documents:
+
+```python
+# modules/document_registry/DR-XXX.registry.py
+
+from pathlib import Path
+from dataclasses import dataclass
+from typing import Dict, List
+import yaml
+
+@dataclass
+class DocumentMetadata:
+    doc_key: str
+    path: Path
+    semver: str
+    status: str
+    effective_date: str
+    owner: str
+    contract_type: str
+    mfid: str  # Module File ID (content hash)
+
+class DocumentRegistry:
+    """Central registry for all versioned documents"""
+    
+    def __init__(self, repo_root: Path):
+        self.repo_root = repo_root
+        self.registry_path = repo_root / "docs" / "registry.yaml"
+        self.documents: Dict[str, DocumentMetadata] = {}
+        
+    def scan_documents(self) -> List[DocumentMetadata]:
+        """Scan repository for documents with versioning front-matter"""
+        docs = []
+        for path in self.repo_root.rglob("*.md"):
+            if metadata := self._extract_metadata(path):
+                docs.append(metadata)
+        return docs
+    
+    def _extract_metadata(self, path: Path) -> DocumentMetadata:
+        """Extract YAML front-matter from document"""
+        with open(path) as f:
+            content = f.read()
+            if content.startswith('---'):
+                # Extract front-matter between --- markers
+                parts = content.split('---', 2)
+                if len(parts) >= 3:
+                    front_matter = yaml.safe_load(parts[1])
+                    return DocumentMetadata(
+                        doc_key=front_matter['doc_key'],
+                        path=path,
+                        semver=front_matter['semver'],
+                        status=front_matter['status'],
+                        effective_date=front_matter['effective_date'],
+                        owner=front_matter['owner'],
+                        contract_type=front_matter['contract_type'],
+                        mfid=self._compute_mfid(path)
+                    )
+        return None
+    
+    def save_registry(self):
+        """Save registry to YAML file"""
+        registry_data = {
+            doc.doc_key: {
+                'path': str(doc.path),
+                'semver': doc.semver,
+                'status': doc.status,
+                'mfid': doc.mfid
+            }
+            for doc in self.documents.values()
+        }
+        with open(self.registry_path, 'w') as f:
+            yaml.dump(registry_data, f)
+```
+
+### 2. **Document Modification Planner** (Extends Existing)
+
+Adapt the Modification Plan system to handle documents:
+
+```python
+# modules/document_planner/DP-XXX.planner.py
+
+@dataclass
+class DocumentModification:
+    """Modification targeting a versioned document"""
+    mod_id: str
+    doc_key: str  # Target document's unique ID
+    operation: str  # "update_content", "bump_version", "deprecate"
+    changes: Dict[str, Any]
+    semver_bump: str  # "major", "minor", "patch"
+    rationale: str
+    
+class DocumentModificationPlanner:
+    """Plans modifications across multiple versioned documents"""
+    
+    def create_modification_plan(
+        self,
+        target_docs: List[str],  # List of doc_keys
+        changes_per_doc: Dict[str, Dict],
+        coordination_strategy: str = "sequential"
+    ) -> ModificationPlan:
+        """
+        Create a plan that modifies multiple documents while maintaining
+        version consistency and dependencies.
+        
+        Args:
+            target_docs: List of doc_key identifiers
+            changes_per_doc: Dict mapping doc_key to changes
+            coordination_strategy: "sequential", "parallel", "phased"
+        """
+        modifications = []
+        
+        for doc_key in target_docs:
+            changes = changes_per_doc.get(doc_key, {})
+            
+            # Determine semver bump based on change type
+            semver_bump = self._analyze_change_impact(changes)
+            
+            mod = DocumentModification(
+                mod_id=f"doc-mod-{len(modifications):03d}",
+                doc_key=doc_key,
+                operation="update_content",
+                changes=changes,
+                semver_bump=semver_bump,
+                rationale=changes.get('rationale', 'Document update')
+            )
+            modifications.append(mod)
+        
+        return ModificationPlan(
+            request_id=ulid.new().str,
+            modifications=modifications,
+            strategy=coordination_strategy
+        )
+```
+
+### 3. **Automated Document Workflow** (Integration)
+
+Create the complete automation workflow:
+
+```python
+# workflows/document_automation.py
+
+class DocumentAutomationWorkflow:
+    """
+    Complete automation for managing versioned documentation
+    """
+    
+    def __init__(self, repo_root: Path):
+        self.repo_root = repo_root
+        self.registry = DocumentRegistry(repo_root)
+        self.planner = DocumentModificationPlanner()
+        
+    def update_documents(
+        self,
+        modifications: Dict[str, Dict],  # doc_key -> changes
+        auto_commit: bool = False
+    ) -> WorkflowResult:
+        """
+        Automate updates to multiple versioned documents
+        
+        Process:
+        1. Validate all target documents exist and are active
+        2. Create modification plan with version bumps
+        3. Generate workstreams (one per document or grouped)
+        4. Execute modifications with git worktrees
+        5. Update document registry
+        6. Create git tags for new versions
+        """
+        
+        # Step 1: Discover and validate documents
+        self.registry.scan_documents()
+        
+        # Step 2: Create modification plan
+        plan = self.planner.create_modification_plan(
+            target_docs=list(modifications.keys()),
+            changes_per_doc=modifications
+        )
+        
+        # Step 3: Generate workstreams
+        workstreams = self._generate_document_workstreams(plan)
+        
+        # Step 4: Execute modifications
+        results = []
+        for ws in workstreams:
+            result = self._execute_document_workstream(ws)
+            results.append(result)
+        
+        # Step 5: Update registry and create tags
+        if all(r.success for r in results):
+            self._update_registry_and_tag(results)
+        
+        return WorkflowResult(results)
+    
+    def _generate_document_workstreams(
+        self, 
+        plan: ModificationPlan
+    ) -> List[DocumentWorkstream]:
+        """
+        Convert modification plan into executable workstreams.
+        Each workstream handles one or more related documents.
+        """
+        workstreams = []
+        
+        for mod in plan.modifications:
+            ws = DocumentWorkstream(
+                wsid=ulid.new().str,
+                doc_key=mod.doc_key,
+                modifications=[mod],
+                branch_name=f"docs/{mod.doc_key}/{mod.semver_bump}",
+                operations=[
+                    self._create_version_bump_operation(mod),
+                    self._create_content_update_operation(mod),
+                    self._create_metadata_update_operation(mod)
+                ]
+            )
+            workstreams.append(ws)
+        
+        return workstreams
+    
+    def _execute_document_workstream(
+        self, 
+        ws: DocumentWorkstream
+    ) -> WorkstreamResult:
+        """
+        Execute document modifications in isolated git worktree
+        """
+        # Create worktree
+        worktree_path = self._create_worktree(ws)
+        
+        try:
+            # Execute each operation
+            for op in ws.operations:
+                op.execute(worktree_path)
+            
+            # Validate changes
+            self._validate_document_changes(worktree_path, ws.doc_key)
+            
+            # Commit changes
+            self._commit_changes(worktree_path, ws)
+            
+            # Merge back to main (if auto-commit enabled)
+            if self.auto_commit:
+                self._merge_to_main(ws)
+            
+            return WorkstreamResult(success=True, wsid=ws.wsid)
+            
+        except Exception as e:
+            # Rollback on failure
+            self._cleanup_worktree(worktree_path)
+            return WorkstreamResult(success=False, wsid=ws.wsid, error=str(e))
+```
+
+### 4. **Implementation Steps**
+
+Here's your implementation roadmap:
+
+```bash
+# Step 1: Set up document registry
+mkdir -p modules/document_registry
+touch modules/document_registry/DR-XXX.registry.py
+touch modules/document_registry/DR-XXX.validator.py
+
+# Step 2: Create modification planner
+mkdir -p modules/document_planner
+touch modules/document_planner/DP-XXX.planner.py
+touch modules/document_planner/DP-XXX.analyzer.py
+
+# Step 3: Set up workflows
+mkdir -p workflows/document_automation
+touch workflows/document_automation/orchestrator.py
+touch workflows/document_automation/validators.py
+
+# Step 4: Create GitHub Actions workflow
+touch .github/workflows/docs-automation.yml
+```
+
+### 5. **GitHub Actions Integration**
+
+```yaml
+# .github/workflows/docs-automation.yml
+name: Document Automation
+
+on:
+  workflow_dispatch:
+    inputs:
+      modification_plan:
+        description: 'JSON modification plan'
+        required: true
+
+jobs:
+  automate-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      
+      - name: Execute document automation
+        run: |
+          python workflows/document_automation/orchestrator.py \
+            --plan "${{ github.event.inputs.modification_plan }}" \
+            --validate \
+            --create-pr
+      
+      - name: Create tags for new versions
+        run: |
+          python workflows/document_automation/tag_creator.py
+```
+
+### Key Differences from Single-Document System
+
+1. **Registry-Based**: Centralized tracking of all documents
+2. **Batch Operations**: Modify multiple documents in one workflow
+3. **Dependency Awareness**: Understands cross-document references
+4. **Parallel Execution**: Uses git worktrees for concurrent updates
+5. **Coordinated Versioning**: Ensures version consistency across related docs
+
+This system transforms your single-document versioning into a full **multi-document management platform** that maintains all the guarantees (unique IDs, versioning, audit trail) while adding automation and scalability.
+
+Would you like me to help you implement any specific component or create the initial file structure?

@@ -1,0 +1,29 @@
+# Packaging & Distribution Policy (issue 30)
+#
+# Defines the package format, required files, and release process
+# for distributing plugins to the ecosystem or marketplace.
+
+format:
+  type: "zip"
+  includes:
+    - plugin.spec.json
+    - manifest.json
+    - schemas/
+    - examples/
+    - tests/
+    - README_PLUGIN.md
+    - LICENSE
+
+release_process:
+  - Validate plugin with `nox -s tests schema`
+  - Generate manifest and compiled artefacts using
+    `scripts/generate_plugin_files.py`
+  - Run security scanning and SBOM generation
+  - Sign the package with cosign and attach provenance
+  - Publish to GitHub Releases and update docs site
+
+repository:
+  strategy: "source-of-truth"
+  tags:
+    - Pre-release tags follow the pattern `alpha-*` and `beta-*`
+    - GA releases follow `v<MAJOR>.<MINOR>.<PATCH>`

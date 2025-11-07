@@ -1,0 +1,144 @@
+
+
+## Major Gaps
+
+### 1. **Plugin Lifecycle Management** (Missing)
+You mention plugins but don't detail:
+- How plugins are discovered (filesystem scan? registry? manual config?)
+- Plugin loading sequence and initialization order
+- Activation/deactivation procedures
+- Graceful shutdown and resource cleanup
+- State management between runs
+- Hot-reloading vs. restart requirements
+
+### 2. **Error Handling & Plugin Isolation** (Underdeveloped)
+Section 11 mentions policies but doesn't cover:
+- What happens when a plugin crashes during execution
+- How plugin failures are isolated from the kernel
+- Error propagation rules (fail-fast vs. continue-on-error)
+- Quarantine/disable mechanisms for misbehaving plugins
+- Recovery and retry strategies
+- Logging and error reporting standards
+
+### 3. **Dependency Management** (Missing)
+Your manifest shows `contract: ">=1.0 <2.0"` but doesn't explain:
+- How plugins declare dependencies on other plugins
+- Dependency resolution order and circular dependency handling
+- Minimum kernel version requirements
+- Transitive dependency management
+- Conflict resolution strategies
+
+### 4. **Performance Requirements** (Underdeveloped)
+"L4 Perf/Soak" is mentioned but lacks:
+- Specific plugin execution time budgets
+- Memory usage limits per plugin
+- Throughput requirements (docs/second)
+- Concurrency/parallelization model (can plugins run in parallel?)
+- Resource pooling strategies
+- Performance regression testing approach
+
+### 5. **Configuration Management** (Underdeveloped)
+You reference `config_schema` but don't detail:
+- Where plugin configurations are stored
+- How configuration overrides work (defaults → file → env → CLI)
+- Runtime configuration updates (hot-reload?)
+- Configuration validation timing
+- Sensitive data handling (secrets, credentials)
+
+### 6. **API Documentation** (Missing)
+No section covering:
+- What kernel APIs/services are exposed to plugins
+- Helper utilities available to plugin developers
+- Data structure reference
+- Code examples for common plugin patterns
+- Best practices and anti-patterns
+
+## Moderate Gaps
+
+### 7. **Packaging & Distribution**
+- Plugin package format (directory? ZIP? Docker image?)
+- Directory structure requirements within plugins
+- How to distribute/install new plugins
+- Plugin marketplace or repository strategy
+- Update/upgrade mechanisms
+
+### 8. **Thread Safety & Concurrency**
+- Can plugins execute concurrently?
+- Thread safety requirements for plugin code
+- Locking/synchronization mechanisms
+- Shared state management
+
+### 9. **Plugin Communication** (Underdeveloped)
+Section 1 lists extension points but doesn't cover:
+- Can plugins communicate with each other directly?
+- Event bus or message passing between plugins
+- Data sharing patterns
+- Orchestration of multi-plugin workflows
+
+### 10. **Backward Compatibility Strategy**
+- API versioning and stability guarantees
+- How breaking changes are handled
+- Migration guides for plugin authors
+- Deprecation policy and timeline
+- Support matrix (which kernel versions support which plugins?)
+
+### 11. **Testing Requirements** (Could be more detailed)
+- Required test coverage thresholds per plugin
+- Contract test requirements
+- Integration test environment setup
+- Mock/stub kernel services for plugin testing
+- Conformance test certification process
+
+### 12. **Development Guidelines**
+Section 12 is brief. Could expand with:
+- SDK/tooling requirements
+- Development workflow (scaffold → implement → test → submit)
+- Code style standards
+- Documentation requirements for plugins
+- Review/approval process
+
+### 13. **Monitoring & Debugging**
+Section 5 mentions OTel traces, but missing:
+- How developers debug their plugins locally
+- What metrics should plugins emit
+- Health check requirements
+- Diagnostic endpoints or commands
+- Log aggregation and querying
+
+## Minor Gaps
+
+### 14. **Deployment Considerations**
+- Installation prerequisites (Python version, system libs?)
+- Platform-specific requirements (Linux/Windows/Mac)
+- Container/orchestration support
+- Scaling considerations
+
+### 15. **Rollback & Recovery**
+- How to rollback a bad plugin update
+- Registry corruption recovery
+- Ledger repair procedures
+- Disaster recovery procedures
+
+### 16. **Security Model** (Could be more detailed)
+Section 11 is brief. Could add:
+- Plugin sandboxing/isolation mechanisms
+- Permission model (what can plugins access?)
+- Code signing or plugin verification
+- Audit logging of plugin actions
+- Security review process for new plugins
+
+### 17. **Plugin Registry/Discovery**
+- Is there a central plugin registry?
+- How users discover available plugins
+- Plugin metadata and search
+- Rating/feedback mechanism
+
+### 18. **Resource Limits**
+- CPU quotas per plugin
+- Memory limits
+- Disk space limits
+- Network access restrictions
+- Timeout policies
+
+
+The gaps are primarily around **runtime behavior, operational concerns, and developer guidance** rather than the core architecture, which is well-defined.

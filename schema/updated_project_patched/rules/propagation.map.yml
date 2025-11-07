@@ -1,0 +1,20 @@
+# Propagation rules map for docs.propagate (issue 1)
+#
+# When upstream documents change, these rules describe which downstream
+# documents should be updated and how. Each rule identifies an
+# upstream "doc_key" and provides a list of downstream targets with
+# operations to perform. These rules are consumed by the docs.propagate
+# plugin to compute and apply changes. Adjust or extend as you add
+# more documents to your system.
+
+upstream_changes:
+  OC_CORE:
+    triggers:
+      - target: docs/IMPLEMENTATION_SUMMARY.md
+        actions:
+          - op: replace
+            selector: $.front_matter.semver
+            value_from: oc_core.semver
+          - op: replace
+            selector: $.front_matter.supersedes_version
+            value_from: oc_core.old_semver
