@@ -1,0 +1,15 @@
+{
+  "name": "Multi-Document Versioning Automation",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/powershell:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.powershell"
+      ]
+    }
+  },
+  "postCreateCommand": "pwsh -NoLogo -NoProfile -Command \"$PSVersionTable.PSVersion\""
+}
