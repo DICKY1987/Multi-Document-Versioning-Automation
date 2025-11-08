@@ -1,0 +1,23 @@
+# Backward Compatibility Strategy (issue 33)
+#
+# Defines stability guarantees and deprecation timelines for APIs,
+# operation contracts, and plugin interfaces.
+
+guarantees:
+  major_version:
+    stable_api: true
+    deprecation_notice: 6 months
+  minor_version:
+    backward_compatible: true
+    new_features: allowed
+  patch_version:
+    backward_compatible: true
+    bug_fixes_only: true
+
+timeline:
+  deprecated_features:
+    removal_time: 2 minor versions
+    notification_channels:
+      - release_notes
+      - migration_guides
+      - deprecation_banners

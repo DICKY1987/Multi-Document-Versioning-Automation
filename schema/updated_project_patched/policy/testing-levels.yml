@@ -1,0 +1,32 @@
+# Testing Levels Policy (issue 19)
+#
+# This policy formalizes required test coverage and complexity
+# according to maturity levels. It ensures that plugins adhere to
+# increasing quality standards as they mature.
+
+levels:
+  L0:
+    description: "Basic schema validation and unit tests"
+    coverage: 50
+    property_tests: 0
+  L1:
+    description: "Comprehensive unit tests and example validation"
+    coverage: 70
+    property_tests: 2
+  L2:
+    description: "Integration tests and fuzz/property testing"
+    coverage: 85
+    property_tests: 5
+    chaos_tests: true
+  L3:
+    description: "Full conformance, chaos and mutation testing"
+    coverage: 95
+    property_tests: 10
+    fuzz_tests: true
+    chaos_tests: true
+    performance_tests: true
+
+enforcement:
+  default_level: L1
+  # The maturity level may be raised for critical plugins after
+  # review. Use `.plugin.yml` in each plugin to override the default.

@@ -1,0 +1,23 @@
+# Sharding and Module Size Policy (issue 9)
+#
+# This policy establishes thresholds to guide the splitting of
+# plugins or modules when they grow too large. Breaking large
+# components into smaller, cohesive units helps maintain
+# maintainability and security.
+
+thresholds:
+  max_plugin_size_mb: 25            # size on disk
+  max_file_count: 200               # maximum number of files per plugin
+  max_op_count: 10                  # maximum operations per plugin
+  max_handler_lines: 800            # maximum lines per handler function/module
+
+actions:
+  on_exceed:
+    - issue_warning: true
+    - require_split: true
+
+criteria:
+  - distinct permission surface (e.g., fs vs network)
+  - differing runtime or dependency stack
+  - independent release cadence
+  - ownership boundaries across teams

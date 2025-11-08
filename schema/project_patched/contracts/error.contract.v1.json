@@ -1,0 +1,25 @@
+{
+  "$id": "urn:contract:error.v1",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Error Contract v1",
+  "type": "object",
+  "required": ["code", "message", "retriable"],
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "A machine-readable error code."
+    },
+    "message": {
+      "type": "string",
+      "description": "A human-readable error message."
+    },
+    "retriable": {
+      "type": "boolean",
+      "description": "Whether the operation may be retried safely."
+    },
+    "details": {
+      "description": "Optional structured details about the error.",
+      "type": ["object", "array", "string", "number", "boolean", "null"]
+    }
+  }
+}

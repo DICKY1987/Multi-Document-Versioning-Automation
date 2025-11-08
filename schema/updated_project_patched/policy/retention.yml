@@ -1,0 +1,26 @@
+# Retention and privacy policy (issue 6)
+#
+# This policy governs how long various artefacts are retained and
+# defines redaction/PII handling rules for snapshots such as
+# `ids/cards/*`, `.ledger/ids.jsonl`, `ids/registry.yaml`, and
+# `.runs/<RUN_ID>/ids.json`. It provides a basis for scrubbing
+# personally identifiable information before publishing logs or
+# distributing artefacts outside the organization.
+
+retention:
+  cards: 365d        # retain ID cards for 1 year
+  ledger: 365d       # retain ledger lines for 1 year
+  registry: 365d     # retain registry snapshots for 1 year
+  run_snapshots: 30d # retain runtime snapshots for 30 days
+
+redaction:
+  pii_fields:
+    - subject.doc_key
+    - subject.path
+    - details.email
+  strategy: hash
+  hash_algo: sha256
+
+rotation_policy:
+  rotate_daily: true
+  max_history: 7

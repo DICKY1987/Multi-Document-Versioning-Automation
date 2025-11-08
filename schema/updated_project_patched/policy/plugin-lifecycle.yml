@@ -1,0 +1,27 @@
+# Plugin Lifecycle Policy (issue 8)
+#
+# This policy defines the lifecycle states for plugins and the
+# processes for deprecation, replacement, and end‑of‑life. Each
+# plugin must declare its state in its front matter or manifest.
+
+states:
+  - active        # fully supported; receives updates and bug fixes
+  - deprecated    # no new features; receives critical fixes only
+  - frozen        # no updates; retained for historical compatibility
+  - retired       # removed from deployment; source may remain for reference
+
+deprecation_process:
+  announce_window: 1 minor # number of minor releases before removal
+  required_notices:
+    - Release notes must highlight the deprecation and specify
+      the recommended replacement plugin.
+    - Migration guide must accompany the deprecation.
+  archival:
+    - Deprecated plugins must be archived in a dedicated directory
+      (`plugins/deprecated/`).
+
+replacement:
+  required_fields:
+    - replaces       # plugin key of the replaced plugin
+    - replacement    # plugin key of the replacement plugin
+    - migration_doc  # path to migration instructions
