@@ -1,0 +1,20 @@
+# Compatibility matrix for plugins and runtime (issue 3)
+#
+# This file declares the supported contract ranges and runtime
+# environments for each plugin. The CI pipeline validates that
+# declarations in plugin manifests conform to these ranges. Add
+# entries here whenever you create a new plugin or update its
+# compatibility. Values under each plugin key should reflect the
+# contract API range and the supported language/runtime versions.
+
+plugins:
+  DOCS_VERSIONING:
+    contract_range: ">=1.0.0 <2.0.0"
+    runtime:
+      language: python
+      version: "3.12"
+  DOCS_PROPAGATE:
+    contract_range: ">=1.0.0 <2.0.0"
+    runtime:
+      language: python
+      version: "3.12"

@@ -1,0 +1,20 @@
+# State‑Change Safety Rails (issue 10)
+#
+# This policy ensures that operations which mutate state implement
+# guardrails to prevent accidental or harmful changes. The goal is
+# to enforce idempotence, provide WhatIf/Confirm modes, and permit
+# rollback when possible.
+
+requirements:
+  idempotence: true
+  supports_dry_run: true      # operations must accept a dry_run flag
+  confirmation_required: true # require an explicit confirm parameter
+  rollback_strategy:
+    on_failure: revert
+    log_location: .ledger/rollback
+
+guidance:
+  - Commands should log old and new values for each change.
+  - Operations must expose a `dry_run` option that computes but does
+    not persist changes.
+  - Use transaction or file backups to support rollback.

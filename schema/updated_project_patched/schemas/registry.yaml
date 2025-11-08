@@ -1,0 +1,16 @@
+# Schema Registry (issue 22)
+#
+# This registry collects metadata about every schema in the
+# repository. Each entry records the `$id`, semantic version,
+# associated plugin, and path. It is generated automatically from
+# schema files and should not be edited by hand.
+
+schemas:
+  - id: urn:plugin.contract.v1
+    semver: 1.0.0
+    plugin: core
+    path: contracts/plugin.contract.v1.json
+  - id: urn:contract:error.v1
+    semver: 1.0.0
+    plugin: core
+    path: contracts/error.contract.v1.json

@@ -1,0 +1,31 @@
+{
+  "key": "DOCS_PROPAGATE",
+  "name": "Docs Propagate",
+  "version": "0.1.0",
+  "owner": "Platform.Engineering",
+  "contract": {
+    "apiVersion": "plugin.contract.v1",
+    "range": ">=1.0.0 <2.0.0"
+  },
+  "events": {
+    "handles": [
+      {
+        "key": "docs.propagate",
+        "input_schema": "schemas/docs.propagate.input.schema.json",
+        "output_schema": "schemas/docs.propagate.output.schema.json"
+      }
+    ]
+  },
+  "actions": {
+    "allowed": ["fs.read", "fs.write", "net.http"],
+    "deny_by_default": true
+  },
+  "config": {
+    "schema": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {}
+    },
+    "defaults": {}
+  }
+}

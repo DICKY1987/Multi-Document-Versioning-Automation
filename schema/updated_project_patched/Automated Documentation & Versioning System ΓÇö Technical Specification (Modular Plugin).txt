@@ -1,0 +1,359 @@
+# Automated Documentation & Versioning System — Technical Specification (Modular Plugin)
+
+## 0) Purpose & Scope
+
+This module builds, validates, versions, and publishes all project documentation as **docs-as-code**, using a **micro-kernel + plugins** architecture with **contract-first** manifests, **conformance tests**, and **deterministic IDs**. It enforces product-based planning (PBS→DDS→RTM), acceptance-test-driven docs, and immutable provenance via an append-only ledger.  
+
+### Goals
+
+* Treat every doc as a versioned product with a **Deliverable Definition Sheet (DDS)**, executable acceptance, and traceability to tests and evidence. 
+* Enforce **contract-first** interfaces for plugins (schemas, inputs/outputs, policies). 
+* Guarantee **deterministic identity** (ULID + stable human key) with **Cards → Ledger → Registry** pattern. 
+* Provide **no-judgment CI gates** (static→contract→behavior→perf→security) with auto-publish on green. 
+
+### Non-Goals
+
+* Not a general CMS; it assumes docs live in Git and are built headlessly.
+* Not a translation platform (can integrate later via plugin).
+
+---
+
+## 1) Architecture Overview
+
+**Core pattern:** *Doc Card (committed) → Doc Ledger (append-only) → Doc Registry (generated)*. The kernel provides discovery, schema validation, and orchestration. Plugins implement discrete capabilities with **JSON in/out** contracts and **manifested** capabilities.  
+
+### Module Boundaries
+
+* **Inputs:** Markdown/MDX, diagrams (Mermaid/Draw.io), YAML/JSON specs, DDS files, tag configs.
+* **Outputs:** Built site (HTML/PDF), registries, reports, badges, release notes, artifacts.
+
+### Extension Points (plugin keys)
+
+* `docs.scan` discover files & map to deliverables (PBS/DDS aware).
+* `docs.parse` normalize front-matter; extract titles/tags; compute doc hash.
+* `docs.validate` schema/links/lint; enforce **DDS acceptance** presence.
+* `docs.version.bump` semver policy & **immutability** of doc identity.
+* `docs.tag` apply taxonomy from `doc-tags.yml`.
+* `docs.registry.build` compile fast lookup & RTM edges.
+* `docs.publish` build+push site and artifacts.
+* `docs.guard` PR gate (one-artifact rule, schema, uniqueness, coverage).
+* `docs.export.*` CSV/JSON/MD exports for audit.
+
+All plugins follow a **Plugin Manifest** (capabilities, contract range, config schema) and ship a **Conformance Test Pack** (fixtures + L0-L3 tests). 
+
+---
+
+## 2) Data Contracts (Schemas)
+
+### 2.1 Doc Card (authoritative; committed)
+
+```yaml
+schema_version: 1
+ulid: 01JC4ABCDXYZ...       # immutable
+key: DOC_OPERATING_CONTRACT # human key, unique, never reused
+semver: 1.3.0               # doc version
+status: active              # active|deprecated
+effective_date: 2025-11-06
+path: docs/source/VERSIONING_OPERATING_CONTRACT.md
+owners: ["docs@project"]
+links:
+  delivers: ["DEL-DOCS-MGMT"]        # PBS leaf
+  acceptance: ["AC-DOCS-001"]        # executable acceptance id
+  evidence: ["reports/docs-validate.xml"]
+card_version: 2                        # metadata revisions only
+```
+
+(Adapted from the ID module’s Card + Registry model.) 
+
+### 2.2 Doc Ledger Event (append-only JSONL, committed)
+
+```json
+{
+  "event_ulid": "01JC4EVT000ABC...",
+  "ts": "2025-11-06T02:31:00Z",
+  "type": "PUBLISH",                   // CREATE|UPDATE|REKEY|DEPRECATE|PUBLISH
+  "subject_ulid": "01JC4ABCDXYZ...",
+  "payload": { "semver": "1.3.0", "ci_run": "run_ulid_here" },
+  "actor": { "by": "ci@repo", "via": "docs.publish@0.2.0" }
+}
+```
+
+
+
+### 2.3 Doc Registry (generated; quick lookups)
+
+```yaml
+by_ulid:
+  01JC4ABCDXYZ...:
+    key: DOC_OPERATING_CONTRACT
+    semver: 1.3.0
+    status: active
+    path: docs/source/VERSIONING_OPERATING_CONTRACT.md
+by_key:
+  DOC_OPERATING_CONTRACT: 01JC4ABCDXYZ...
+```
+
+
+
+### 2.4 DDS (Deliverable Definition Sheet) for Docs (committed)
+
+```yaml
+id: DEL-DOCS-MGMT
+name: "Automated Documentation & Versioning"
+purpose: "Docs-as-code pipeline with versioning & proof"
+acceptance:
+  - id: AC-DOCS-001
+    gherkin: |
+      Feature: Docs registry
+        Scenario: Registry completeness
+          Given committed Doc Cards and source files
+          When docs.registry.build runs
+          Then every Doc Card path exists
+          And every active doc appears in registry with current semver
+evidence:
+  tests: ["tests/behavior/docs_registry.feature::complete_registry"]
+  reports: ["reports/docs-validate.xml"]
+```
+
+
+
+---
+
+## 3) Versioning & Identity
+
+* **ULID** is minted at first creation and never changes. Renames create aliases; keys are **never reused**. 
+* **SemVer** applies to the **doc content**. CI enforces bump on meaningful changes; ledger records events.
+* **One-artifact rule** (optional): PR must touch only one Doc Card or source doc per change set for clarity. 
+
+---
+
+## 4) CI/CD Gates (No-Judgment Pipeline)
+
+1. **L0 Static**: markdownlint, link-check, schema lint.
+2. **L1 Contract/Unit**: plugin I/O schemas, manifest validation.
+3. **L2 Behavior/BDD**: DDS acceptance (Given/When/Then) in CI.
+4. **L3 Integration**: full build with hermetic adapters.
+5. **L4 Perf/Soak** (optional): build time, page count budgets.
+6. **L5 Security/License**: policy checks for embedded assets.
+   **Green → auto-publish; Red → quarantine with actionable report.** 
+
+---
+
+## 5) Observability
+
+Every plugin run emits an **OTel trace** (`plugin.key`, `subject.ulid`, `result`) with run ULID, uploaded as artifacts; local Jaeger/SigNoz for dev, console exporter in CI. 
+
+---
+
+## 6) File Tree (reference implementation)
+
+```
+auto-docs/
+├─ ARCHITECTURE.md
+├─ AUTOMATED_DOCS_GUIDE.md
+├─ VERSIONING_OPERATING_CONTRACT.md
+├─ IMPLEMENTATION_CHECKLIST.md
+├─ IMPLEMENTATION_SUMMARY.md
+├─ Document Versioning AutomationREADME.md
+├─ doc-tags.yml
+├─ docs-guard.yml
+├─ specs/
+│  ├─ contracts/
+│  │  └─ plugin.contract.v1.json
+│  └─ schemas/
+│     ├─ doc_card.schema.json
+│     ├─ doc_ledger_event.schema.json
+│     ├─ doc_registry.schema.json
+│     ├─ docs.scan.in.schema.json
+│     ├─ docs.scan.out.schema.json
+│     ├─ docs.validate.report.schema.json
+│     └─ docs.publish.out.schema.json
+├─ ids/
+│  └─ docs/
+│     └─ cards/
+│        └─ <ULID>.yaml
+├─ .ledger/
+│  └─ docs.jsonl
+├─ registry/
+│  └─ docs.registry.yaml
+├─ docs/
+│  ├─ source/
+│  │  ├─ index.md
+│  │  ├─ guides/
+│  │  │  ├─ authoring.md
+│  │  │  └─ versioning.md
+│  │  └─ standards/
+│  │     └─ contracts.md
+│  └─ site/                # build output (ignored by Git)
+├─ plan/
+│  ├─ pbs.yaml
+│  ├─ file-map.yaml
+│  ├─ rtm.yaml
+│  └─ deliverables/
+│     └─ DEL-DOCS-MGMT.yaml
+├─ plugins/
+│  └─ docs/
+│     ├─ PLG_DOCS_SCAN/
+│     │  ├─ manifest.yaml
+│     │  ├─ README.md
+│     │  ├─ src/scan.py
+│     │  ├─ schemas/{in,out}.schema.json
+│     │  ├─ examples/*.json
+│     │  └─ tests/test_scan.py
+│     ├─ PLG_DOCS_PARSE/
+│     │  ├─ manifest.yaml
+│     │  └─ src/parse.py
+│     ├─ PLG_DOCS_VALIDATE/
+│     │  ├─ manifest.yaml
+│     │  ├─ src/validate.py
+│     │  ├─ schemas/validate.report.schema.json
+│     │  └─ tests/test_validate.py
+│     ├─ PLG_DOCS_VERSION_BUMP/
+│     │  ├─ manifest.yaml
+│     │  └─ src/version_bump.py
+│     ├─ PLG_DOCS_TAG/
+│     │  ├─ manifest.yaml
+│     │  └─ src/tag.py
+│     ├─ PLG_DOCS_REGISTRY_BUILD/
+│     │  ├─ manifest.yaml
+│     │  └─ src/registry_build.py
+│     ├─ PLG_DOCS_PUBLISH/
+│     │  ├─ manifest.yaml
+│     │  └─ src/publish.py
+│     └─ PLG_DOCS_GUARD/
+│        ├─ manifest.yaml
+│        └─ src/guard.py
+├─ scripts/
+│  ├─ get_doc_versions.py
+│  ├─ build_doc_registry.py
+│  └─ example_integration.py
+├─ tests/
+│  ├─ behavior/
+│  │  └─ docs_registry.feature
+│  ├─ contract/
+│  │  └─ test_manifests.py
+│  └─ unit/
+│     └─ test_version_bump.py
+└─ .github/workflows/
+   ├─ docs-guard.yml
+   ├─ docs-post-merge.yml
+   └─ docs-release.yml
+```
+
+---
+
+## 7) File-by-File Purpose (key artifacts & deliverables)
+
+* **ARCHITECTURE.md** — high-level system design & flows. *Deliverable:* Architecture doc. 
+* **AUTOMATED_DOCS_GUIDE.md** — operator & contributor handbook. *Deliverable:* Guide (user-facing).
+* **VERSIONING_OPERATING_CONTRACT.md** — governance rules for doc semver, tagging, change control. *Deliverable:* Operating contract.
+* **IMPLEMENTATION_CHECKLIST.md** — DoR/DoD checklists for releases. *Deliverable:* Gate checklist.
+* **IMPLEMENTATION_SUMMARY.md** — concise release notes & deltas.
+* **Document Versioning AutomationREADME.md** — module readme for fast onboarding.
+* **doc-tags.yml** — controlled vocabulary & facets used by `docs.tag`. *Deliverable:* Taxonomy config.
+* **docs-guard.yml** — policy bundle (one-artifact rule, coverage %, linkcheck budgets) loaded by `docs.guard`. *Deliverable:* Policy-as-code.
+* **specs/contracts/plugin.contract.v1.json** — global contract definition (schemas, error semantics) all plugins must honor. *Deliverable:* Source of truth. 
+* **specs/schemas/*.schema.json** — JSON Schemas for Cards, Ledger, Registry, plugin I/O. *Deliverable:* Validated contracts.
+* **ids/docs/cards/<ULID>.yaml** — Doc Cards, authoritative identity & metadata. *Deliverable:* Identity record. 
+* **.ledger/docs.jsonl** — append-only events proving history. *Deliverable:* Provenance ledger. 
+* **registry/docs.registry.yaml** — generated index for fast lookups & audit joins. *Deliverable:* Registry. 
+* **docs/source/** — primary docs content (Markdown/MDX). *Deliverable:* Published content.
+* **plan/pbs.yaml** — PBS of documentation products (outputs). *Deliverable:* PBS. 
+* **plan/deliverables/DEL-DOCS-MGMT.yaml** — DDS with acceptance & evidence. *Deliverable:* Executable acceptance. 
+* **plan/file-map.yaml** — map docs ↔ cards ↔ tests. *Deliverable:* Traceable file plan. 
+* **plan/rtm.yaml** — Requirements/Deliverables ↔ Tests ↔ Evidence. *Deliverable:* RTM. 
+* **plugins/docs/*** — plugin implementation folders (each with `manifest.yaml`, `src/*`, `schemas/*`, `tests/*`, `examples/*`), plus conformance tests. *Deliverable:* Extensible capabilities. 
+* **scripts/get_doc_versions.py** — utility used by `docs.version.bump` to compute new semver from diffs/policy. *Deliverable:* Semver tool.
+* **scripts/build_doc_registry.py** — batch compile registry from Cards. *Deliverable:* Registry builder.
+* **scripts/example_integration.py** — sample embedding of the SDK into other tooling.
+* **tests/** — L0-L3 test packs (contract, behavior, unit). *Deliverable:* Proof. 
+* **.github/workflows/** — PR guard, post-merge registry, release/publish pipelines. *Deliverable:* Automated CI/CD. 
+
+> **All other files** (e.g., diagram sources, templates) live under `docs/source/` and are discovered by `docs.scan`.
+
+---
+
+## 8) Plugin Manifests (shape)
+
+```yaml
+apiVersion: plugin.contract.v1
+key: PLG_DOCS_VALIDATE
+version: 0.3.0
+contract: ">=1.0 <2.0"
+capabilities: ["validate"]
+config_schema: "schemas/validate.config.schema.json"
+inputs:
+  - name: source_map
+    schema: "schemas/docs.scan.out.schema.json"
+outputs:
+  - name: report
+    schema: "schemas/validate.report.schema.json"
+conformance:
+  tests:
+    - "tests/unit/test_validate.py"
+    - "tests/behavior/docs_registry.feature::validation"
+```
+
+(Contracts + compatibility ranges + conformance kit.) 
+
+---
+
+## 9) Workflows (happy path)
+
+1. **Author/Update doc** → commit doc + update Doc Card front-matter (if needed).
+2. **Open PR** → `docs.guard` runs: static lint, schema checks, acceptance stubs, uniqueness, one-artifact rule.
+3. **Merge to main** → `docs.registry.build` regenerates registry; `docs.publish` builds site; **PUBLISH** event written to ledger; release notes generated. 
+
+---
+
+## 10) Acceptance (Definition of Done)
+
+* 100% of Doc Cards map to existing files; 0 orphans both ways.
+* DDS acceptance features pass in CI (green L2).
+* Ledger receives `CREATE/UPDATE/PUBLISH` with run ULID for each change.
+* Registry rebuilds clean; `by_ulid` and `by_key` are consistent.
+* Docs site builds with no broken links; perf budgets respected.
+* Policies in `docs-guard.yml` satisfied (coverage, one-artifact rule if enabled). 
+
+---
+
+## 11) Security & Policy
+
+* Policies (OPA/Rego or YAML) enforced at dev, CI, and runtime adapters; SBOM/license scan as part of L5. 
+
+---
+
+## 12) Developer Experience
+
+* `pwsh ./Dev.ps1` (or `make dev`) runs L0-L2 locally; `make conformance` runs the same suite CI uses. Scaffolding produces manifest, schemas, test stubs, and README for any new plugin. 
+
+---
+
+## 13) Implementation Notes
+
+* Prefer **hexagonal** internals in each plugin for testability. Modularity and separation (acquisition/transform/validation/orchestration) keeps the code deterministic and maintainable. 
+* Use **PBS→DDS→File-Map→RTM** templates under `/plan` to keep deliverables first and verification executable. 
+
+---
+
+## 14) Deliverables List (what the final system outputs)
+
+1. **Published site** (HTML) and optional **PDF book**.
+2. **Doc Registry** (`registry/docs.registry.yaml`).
+3. **Doc Ledger** (`.ledger/docs.jsonl`) with immutability proof.
+4. **Doc Cards** (`ids/docs/cards/*.yaml`) for all docs.
+5. **Policy report** (validate report JSON/XML) & **test reports** (L0-L3).
+6. **Release notes & badges** (coverage/health).
+7. **Artifacts**: conformance results, OTel traces, run snapshot (`.runs/<RUN_ULID>/…`).  
+
+---
+
+## 15) Risk & Mitigation
+
+* **Drift between docs and registry** → Block merges via `docs.guard` & BDD acceptance. 
+* **Identity churn** → keys never reused; renames become aliases; ULID immutable. 
+* **Flaky validation** → treat as bugs; stabilize tests before release. 
+
+---
+
+

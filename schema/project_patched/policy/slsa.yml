@@ -1,0 +1,16 @@
+# SLSA and supply-chain policy (issue 4)
+#
+# This policy declares the minimum Supply-chain Levels for Software
+# Artifacts (SLSA) requirements for this repository. The release
+# workflows should generate attested SBOMs and provenance that meet
+# the specified level. See https://slsa.dev for definitions.
+
+slsa:
+  level: 3              # minimum SLSA level to achieve
+  attestation_required: true
+  sbom_required: true
+  provenance_required: true
+  # Additional attestation formats can be listed here, e.g. in-toto
+  formats:
+    - cyclonedx-json
+    - spdx-json

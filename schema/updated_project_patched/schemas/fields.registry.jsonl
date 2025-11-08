@@ -1,0 +1,4 @@
+{"schema_id": "urn:plugin.contract.v1", "field_pointer": "/apiVersion", "field_id": "f001"}
+{"schema_id": "urn:plugin.contract.v1", "field_pointer": "/range", "field_id": "f002"}
+{"schema_id": "urn:contract:error.v1", "field_pointer": "/code", "field_id": "f101"}
+{"schema_id": "urn:contract:error.v1", "field_pointer": "/message", "field_id": "f102"}

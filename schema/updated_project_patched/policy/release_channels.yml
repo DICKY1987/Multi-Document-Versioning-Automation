@@ -1,0 +1,26 @@
+# Release channels & migration policy (issue 18)
+#
+# This policy defines supported release channels and the rules for
+# promoting artifacts between them. It also specifies when a
+# migration document is required for a release.
+
+channels:
+  - alpha
+  - beta
+  - ga
+
+rules:
+  alpha:
+    allowed_breaking_changes: true
+    migration_doc_required: false
+  beta:
+    allowed_breaking_changes: false
+    migration_doc_required: true
+  ga:
+    allowed_breaking_changes: false
+    migration_doc_required: true
+
+migration_guidelines:
+  - All MAJOR version bumps must be accompanied by a migration guide.
+  - The guide must list deprecated features, replacement instructions,
+    and any manual steps required.

@@ -1,0 +1,26 @@
+# Testing Requirements Policy (issue 34)
+#
+# Specifies minimum testing standards for plugins including code
+# coverage, integration tests, property/fuzz tests, and runtime
+# environment. Use this policy in conjunction with the testing
+# levels policy to determine the exact requirements for a given
+# maturity level.
+
+requirements:
+  coverage_min: 70
+  integration_tests_required: true
+  property_tests_min: 2
+  fuzz_tests_required: false
+  chaos_tests_required: false
+  performance_tests_required: false
+
+environment:
+  python_version: "3.12"
+  node_version: "20"
+  # Additional runtime versions may be added here
+
+certification:
+  process: |
+    Prior to release, an independent reviewer must verify that all
+    test requirements are met and sign off. Certification reports
+    should be stored in the `conformance/certification` directory.

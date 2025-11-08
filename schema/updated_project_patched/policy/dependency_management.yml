@@ -1,0 +1,24 @@
+# Inter-Plugin Dependency Management Policy (issue 26)
+#
+# This policy defines how plugins may declare dependencies on other
+# plugins and kernel versions. It prevents circular and conflicting
+# dependencies and helps the kernel resolve load order.
+
+dependencies:
+  syntax:
+    # Each plugin may declare a `depends_on` field in its
+    # manifest listing required plugins with version ranges.
+    # Example: depends_on:
+    #   DOCS_VERSIONING: ">=1.0.0 <2.0.0"
+    key: version_range
+
+conflict_resolution:
+  - Circular dependencies are forbidden; the kernel must detect
+    cycles and abort initialization.
+  - Version conflicts (ranges that do not intersect) cause an
+    error at plugin load time.
+
+kernel_dependency:
+  # Plugins may specify a required kernel API version using
+  # `requires_kernel: ">=1.0 <2.0"` in their manifest. The kernel
+  # verifies compatibility at load time.
